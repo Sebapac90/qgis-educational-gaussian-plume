@@ -167,7 +167,7 @@ un caso con ausentes.
   No usar el estiramiento automático por extensión visible para comparar.
 - [x] **Isolíneas:** comprobar los campos `concentration` y
   `concentration_unit`. Con mínimo 1 µg/m³, el escenario D de referencia usa
-  1, 2, 5, 10, 20, 50, 100, 200 y 300. Para entradas editadas en el notebook,
+  1, 2, 5, 10, 20, 50, 100, 200 y 300. Para entradas editadas manualmente,
   cotejar `contour_levels` y `concentration_unit` del informe. Si la salida es
   µg/m³ también existe el campo compatible `concentration_ug_m3`.
   Etiquetar con el campo y la unidad declarados;

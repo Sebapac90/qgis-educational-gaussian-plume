@@ -18,8 +18,7 @@ No se reconstruyen emisiones históricas ni operación actual de la central.
 - `gaussian_raster.py`: GeoTIFF y reproyección para la vista web.
 - `gaussian_map.py`: visualización cartográfica con Folium/OpenStreetMap.
 - `examples/patache.json`: todas las entradas del caso, con unidades.
-- `notebooks/02_pluma_sobre_mapa.ipynb`: guía ejecutable y editable.
-- `scripts/run_spatial_case.py`: el mismo recorrido sin notebook.
+- `scripts/run_spatial_case.py`: recorrido reproducible del caso espacial.
 
 El mapa permite navegar, activar capas y leer coordenadas al hacer clic.
 El control de capas incluye **Información del escenario**, activada inicialmente:
@@ -86,7 +85,7 @@ y la salida GeoTIFF son locales y no dependen de conexión.
 ## Resultado inicial y límites
 
 El caso Masters produce un máximo muestreado de aproximadamente 221,557 µg/m³.
-Es diferente del receptor puntual del primer notebook porque la grilla tiene
+Es diferente del receptor puntual usado durante la exploración inicial porque la grilla tiene
 otros centros de muestreo. Al borde sur aún hay aproximadamente 57,279 µg/m³:
 la pluma visible **alcanza el límite del dominio**. No se afirma que desaparezca
 a 5 km. El informe registra este hecho; se puede ampliar el dominio después.
@@ -118,8 +117,7 @@ Folium 0.14.0 y Matplotlib 3.7.1.
 Anaconda heredaba PROJ_LIB apuntando a una base PROJ incompatible con Rasterio.
 Los lanzadores de pruebas y escenario eliminan PROJ_LIB/PROJ_DATA solo del
 proceso actual antes de importar GIS, para usar las bases incluidas con las
-bibliotecas. La primera celda del notebook hace lo mismo; se debe iniciar con
-kernel nuevo. No se modifica la configuración global ni ningún archivo de PROJ.
+bibliotecas. No se modifica la configuración global ni ningún archivo de PROJ.
 
 Desde la raíz, con el entorno espacial `gee`:
 
@@ -252,12 +250,12 @@ superposiciones entre etiquetas; al acercarse pueden aparecer más niveles.
 El valor sigue disponible al pasar el cursor por una curva sin etiqueta.
 La detección de colisiones cubre las etiquetas entre sí, no los nombres de la
 cartografía ni los marcadores. Las geometrías GeoJSON y valores del TIFF no
-se alteran; la máscara solo afecta la vista web, también dentro del notebook.
+se alteran; la máscara solo afecta la vista web del prototipo independiente.
 
 Comprobación visual en Chrome con el escenario actual de clase A: etiqueta
 alineada en la vista general, niveles interiores al acercar y ocultación al
-desactivar la capa. El notebook importa este renderizador: volver a ejecutar
-la celda de cálculo y luego `mapa` actualiza una salida guardada anteriormente.
+desactivar la capa. El prototipo independiente importa este renderizador y
+permite actualizar una salida guardada anteriormente.
 
 ### Selección de concentraciones para las isolíneas — 2026-09-09
 

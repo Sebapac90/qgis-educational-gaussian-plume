@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "qgis_plugin/gaussian_educativo"
 DIST = ROOT / "dist"
 VERSION = "0.14.0"
+ZIP_TIMESTAMP = (1980, 1, 1, 0, 0, 0)
 
 
 def main():
@@ -19,8 +20,12 @@ def main():
     with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as bundle:
         for path in sorted(files):
             relative = path.relative_to(SOURCE)
-            bundle.writestr(str(Path("gaussian_educativo") / relative),
-                            path.read_bytes())
+            name = (Path("gaussian_educativo") / relative).as_posix()
+            info = zipfile.ZipInfo(name, date_time=ZIP_TIMESTAMP)
+            info.compress_type = zipfile.ZIP_DEFLATED
+            info.create_system = 3
+            info.external_attr = 0o100644 << 16
+            bundle.writestr(info, path.read_bytes())
     digest = hashlib.sha256(archive.read_bytes()).hexdigest()
     manifest = {"plugin": "gaussian_educativo", "version": VERSION,
                 "archive": str(archive), "sha256": digest,

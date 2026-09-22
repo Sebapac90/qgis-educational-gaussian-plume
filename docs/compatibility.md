@@ -60,7 +60,7 @@ cambio a Qt6; cambiar metadata no demuestra compatibilidad.
 
 El complemento usa QGIS/PyQt, GDAL, NumPy y PyProj para calcular, y Matplotlib
 para la rosa PNG. No necesita `gee`, Jupyter, Folium, Rasterio ni attrs en el
-flujo QGIS. Los notebooks requieren su entorno separado y
+flujo QGIS. Las herramientas espaciales independientes de desarrollo usan
 `requirements-spatial.txt`; ese archivo no debe instalarse indiscriminadamente
 en el Python de QGIS.
 

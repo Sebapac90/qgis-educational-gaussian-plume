@@ -1,94 +1,87 @@
 # Pluma Gaussiana Educativa para QGIS
 
-Repositorio: <https://github.com/Sebapac90/qgis-educational-gaussian-plume>
+Complemento experimental y bilingüe para enseñar la dispersión atmosférica con una pluma gaussiana estacionaria sobre terreno plano. La implementación física sigue a Masters y Ela (2008), capítulo 7, y utiliza las ecuaciones de dispersión de Martin (1976).
 
-Complemento docente para explorar una pluma gaussiana estacionaria sobre terreno plano. El modelo físico sigue a Masters y Ela (2008), capítulo 7: clases de estabilidad A–F, coeficientes de dispersión de Martin (1976), reflexión perfecta en el suelo y corrección de la rapidez del viento por altura.
+El complemento es una herramienta docente. **No es un modelo regulatorio** y no representa terreno, edificios, deposición, química atmosférica, variación vertical de la dirección del viento ni ascenso de pluma.
 
-No es un modelo regulatorio. No representa terreno, edificios, deposición, química, variación vertical de la dirección ni ascenso de pluma.
+## Descarga e instalación
 
-## Instalación en QGIS
+Descargue el archivo `gaussian_educativo-0.14.0.zip` desde la sección [Releases](https://github.com/Sebapac90/qgis-educational-gaussian-plume/releases). No descomprima el archivo.
 
-El paquete experimental actual es `dist/gaussian_educativo-0.14.0.zip`.
+1. Abra QGIS.
+2. Vaya a **Complementos → Administrar e instalar complementos…**.
+3. Seleccione **Instalar a partir de ZIP**.
+4. Elija el archivo descargado y acepte la advertencia de complemento experimental.
+5. Abra **Ver → Paneles → Pluma Gaussiana Educativa**.
 
-1. Abrir QGIS.
-2. Ir a **Complementos → Administrar e instalar complementos…**.
-3. Elegir **Instalar a partir de ZIP**.
-4. Seleccionar el ZIP y aceptar la advertencia de complemento experimental.
-5. Abrir **Ver → Paneles → Pluma Gaussiana Educativa**.
+El complemento no requiere Jupyter ni un entorno Conda. En las versiones de QGIS verificadas utiliza Python, PyQGIS, GDAL, NumPy, PyProj y Matplotlib incluidos con QGIS.
 
-La versión 0.14.0 usa un único modelo físico. Los escenarios guardados con los esquemas 1 y 2 se pueden abrir; los campos adicionales de versiones previas se ignoran y el cálculo se ejecuta con Masters.
+## Funciones principales
 
-## Uso básico
+- selección de una fuente desde el lienzo o mediante coordenadas;
+- coordenadas de entrada en WGS 84 o en el CRS del proyecto;
+- conversión automática a UTM/UPS para calcular distancias en metros;
+- emisión en kg/s, g/s, mg/s o µg/s;
+- clases de estabilidad atmosférica A–F;
+- corrección de la rapidez del viento desde su altura de medición hasta la altura de la chimenea;
+- viento constante, predominante sintético, aleatorio uniforme sintético o tabla de observaciones;
+- dominio fijo o extensión automática controlada para viento constante;
+- isolíneas automáticas 1–2–5 o niveles definidos por el usuario;
+- interfaz en español e inglés;
+- guardado y recuperación de escenarios JSON.
 
-El panel permite:
+## Tabla de viento
 
-- elegir la fuente en cualquier parte del mundo en WGS84 o desde el lienzo de QGIS;
-- convertir automáticamente a UTM/UPS para calcular en metros;
-- ingresar emisión en kg/s, g/s, mg/s o µg/s;
-- escoger estabilidad A–F, altura de chimenea y altura de medición del viento;
-- usar viento constante, predominante sintético, aleatorio uniforme sintético o una tabla CSV;
-- generar GeoTIFF, isolíneas GeoPackage, fuente puntual y rosa de vientos;
-- guardar y recuperar el escenario en JSON.
+El asistente de importación permite seleccionar las columnas y declarar el formato de fecha, las unidades, el sentido de la dirección y los códigos usados para calma, dirección variable o datos ausentes. El archivo original no se modifica.
 
-La tabla normalizada de observaciones tiene tres columnas:
+El formato interno normalizado es:
 
 ```csv
 timestamp_utc,direction_from_deg,wind_speed_m_s
 2026-09-01T00:00:00Z,45,4.2
 ```
 
-Cada fila representa un intervalo de igual duración. La dirección es meteorológica **DESDE**, en grados horarios desde norte verdadero, y la rapidez está en m/s. El asistente puede asignar columnas, interpretar fechas, convertir km/h o nudos, convertir direcciones HACIA y excluir códigos declarados de calma, variable o ausente sin modificar el archivo original.
+Cada fila representa un intervalo de igual duración. La dirección es meteorológica **DESDE**, medida en grados horarios desde el norte verdadero, y la rapidez está en m/s. La rosa muestra 16 sectores; el cálculo agrupa las observaciones en 72 sectores de 5° y siete clases de rapidez antes de promediar las concentraciones ponderadas.
 
-La rosa usa 16 sectores. El cálculo agrupa las observaciones en 72 sectores de 5° y siete clases de rapidez, conserva sus frecuencias y promedia las concentraciones ponderadas. Esta reducción fue aceptada para el MVP docente; no implica equivalencia regulatoria.
+## Resultados
 
-## Núcleo y archivos
+Cada ejecución puede producir:
 
-- `gaussian_core.py`: ecuación y parametrizaciones físicas, independiente de QGIS.
-- `gaussian_spatial.py`: CRS, marco de la pluma y grilla.
-- `gaussian_wind.py`: series, agrupación, promedio y rosa de vientos.
-- `gaussian_raster.py`, `gaussian_contours.py`, `gaussian_map.py`: salidas espaciales.
-- `qgis_plugin/gaussian_educativo/`: complemento QGIS.
-- `notebooks/01_explorar_nucleo.ipynb`: introducción al modelo.
-- `notebooks/02_pluma_sobre_mapa.ipynb`: escenario espacial interactivo.
-- `examples/patache.json`: caso docente reproducible.
-- `docs/model.md`: ecuaciones, unidades y decisiones físicas.
-- `docs/spatial.md`: decisiones espaciales y política de dominio.
-- `docs/qgis-checklist.md`: lista de validación manual.
+- concentración como GeoTIFF georreferenciado;
+- isolíneas y fuente puntual como capas vectoriales;
+- rosa de vientos en PNG;
+- escenario y resumen de resultados en JSON;
+- capas agrupadas, etiquetadas y simbolizadas en el proyecto QGIS.
 
-Las unidades internas son kg/s, m/s, m y kg/m³. Las conversiones de masa se realizan de forma explícita en la capa de entrada y salida.
+La política predeterminada conserva el dominio solicitado y advierte si la pluma alcanza su borde. La extensión automática está limitada por tamaño y costo computacional; reducir la concentración periférica no demuestra contención física completa.
 
-## Entorno de desarrollo
+## Modelo y unidades
 
-Abrir `Gaussian.code-workspace` y seleccionar el kernel `gee`:
+El modelo usa reflexión perfecta en el suelo y altura efectiva igual a la altura física de la chimenea, por lo que supone ascenso de pluma nulo. Las unidades internas son kg/s, m/s, m y kg/m³; las conversiones de entrada y salida son explícitas.
 
-el intérprete Python del entorno `gee`
+La formulación, los supuestos y las decisiones están documentados en [docs/model.md](docs/model.md). La política espacial se describe en [docs/spatial.md](docs/spatial.md).
 
-Validación completa sin modificar variables globales de PROJ:
+## Compatibilidad y validación
 
-```bash
-conda run -n gee env -u PROJ_LIB -u PROJ_DATA \
-  PYTHONDONTWRITEBYTECODE=1 python scripts/validate.py
-```
+La versión 0.14.0 fue probada con QGIS 3.44.14 LTR en macOS. El paquete pasó 60 pruebas automáticas, comprobaciones analíticas independientes, pruebas del algoritmo de Procesos y del panel, y una instalación manual funcional. La validación en Windows y la adaptación a QGIS 4 permanecen pendientes.
 
-Reproducir Patache:
+Consulte [docs/compatibility.md](docs/compatibility.md) y la [lista de validación manual](docs/qgis-checklist.md) para conocer el alcance exacto de las pruebas.
 
-```bash
-conda run -n gee env -u PROJ_LIB -u PROJ_DATA \
-  PYTHONDONTWRITEBYTECODE=1 python scripts/run_spatial_case.py examples/patache.json
-```
+El caso Patache, con dominio de 10 × 10 km, resolución de 50 m, clase D, emisión de 40 g/s, viento de 5 m/s medido a 10 m y chimenea de 50 m, produce un máximo de 221,557 µg/m³ y un máximo periférico de 57,279 µg/m³. La salida se declara truncada porque la pluma alcanza el borde.
 
-El caso genera en `outputs/patache/`:
+## Código fuente
 
-- `pluma_ug_m3.tif`;
-- `isolineas.geojson` y `fuente.geojson`;
-- `caso_y_resultados.json`;
-- `mapa_pluma.html`;
-- `rosa_vientos.png`.
+El repositorio se concentra en el complemento QGIS y su implementación en Python:
 
-Validación del 22 de septiembre de 2026: **60 pruebas correctas** con Python 3.12.0 en `gee`. El algoritmo real y el panel pasaron además bajo QGIS 3.44.14 LTR en macOS, y el usuario confirmó el funcionamiento del ZIP 0.14.0 en una prueba manual.
+- `qgis_plugin/gaussian_educativo/`: paquete instalable del complemento;
+- `docs/`: fundamento, compatibilidad y procedimientos de validación;
+- `examples/`: escenarios y tablas sintéticas redistribuibles;
+- `tests/`: pruebas del núcleo numérico y espacial;
+- `scripts/`: construcción del ZIP y comprobaciones reproducibles;
+- `validation/`: evidencia compacta de las pruebas aceptadas.
 
-Para Patache, con dominio 10 × 10 km, resolución 50 m, clase D, emisión 40 g/s, viento observado de 5 m/s a 10 m y chimenea de 50 m, el máximo es 221,557 µg/m³ y el máximo del borde 57,279 µg/m³. La pluma alcanza el borde; el resultado debe declararse truncado o repetirse con la política de extensión.
+El núcleo físico permanece independiente de la interfaz QGIS para que sus ecuaciones puedan probarse directamente. Los notebooks exploratorios y los datos meteorológicos originales se conservan fuera de la publicación.
 
 ## Licencia
 
-Código distribuido bajo GNU GPL versión 2 o posterior. Véase `LICENSE`.
+Código distribuido bajo GNU GPL versión 2 o posterior. Véase [LICENSE](LICENSE).

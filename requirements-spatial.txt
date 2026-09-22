@@ -1,4 +1,5 @@
--r requirements-notebook.txt
+-r requirements.txt
+matplotlib>=3.7,<4
 pyproj>=3.6,<4
 rasterio>=1.4,<2
 # Baseline verified with Rasterio 1.4.4 in gee; keep the tested attrs release family.

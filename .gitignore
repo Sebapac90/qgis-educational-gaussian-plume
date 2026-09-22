@@ -11,7 +11,12 @@ dist/
 outputs/
 
 # Machine-specific editor configuration
-.vscode/settings.json
+.vscode/
+*.code-workspace
+
+# Local exploratory material; the public repository is QGIS-focused.
+notebooks/
+requirements-notebook.txt
 
 # Local development instructions and preserved historical material
 AGENTS.md
