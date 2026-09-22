@@ -6,6 +6,12 @@ El complemento aplica el modelo gaussiano clásico descrito por Gilbert M. Maste
 
 El objetivo es docente y técnico básico. El resultado no sustituye una evaluación regulatoria ni un modelo de capa límite como AERMOD.
 
+La idea de trasladar una simulación educativa a una herramienta interactiva se
+inspiró en *Gaussian plume model practical*, de Paul J. Connolly, Universidad
+de Manchester (2017). La implementación actual se desarrolló específicamente
+para QGIS y adoptó como base física el tratamiento de Masters y Ela indicado
+arriba.
+
 ## Ecuación y unidades
 
 Para una fuente puntual continua y `x > 0`:

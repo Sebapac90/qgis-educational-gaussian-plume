@@ -61,20 +61,23 @@ El modelo usa reflexión perfecta en el suelo y altura efectiva igual a la altur
 
 La formulación, los supuestos y las decisiones están documentados en [docs/model.md](docs/model.md). La política espacial se describe en [docs/spatial.md](docs/spatial.md).
 
-## Compatibilidad y validación
+## Fundamento e inspiración
 
-La versión 0.14.0 fue probada con QGIS 3.44.14 LTR en macOS. El paquete pasó 60 pruebas automáticas, comprobaciones analíticas independientes, pruebas del algoritmo de Procesos y del panel, y una instalación manual funcional. La validación en Windows y la adaptación a QGIS 4 permanecen pendientes.
+La formulación física adoptada corresponde al modelo gaussiano clásico presentado por Masters y Ela (2008), capítulo 7. De esa fuente proceden la ecuación de concentración, la corrección de la rapidez del viento por altura y las ecuaciones de Martin (1976) para los coeficientes de dispersión.
 
-Consulte [docs/compatibility.md](docs/compatibility.md) y la [lista de validación manual](docs/qgis-checklist.md) para conocer el alcance exacto de las pruebas.
+La idea de crear una herramienta docente interactiva se inspiró en *Gaussian plume model practical*, desarrollado por Paul J. Connolly en la Universidad de Manchester. Ese antecedente utiliza experimentos sintéticos para enseñar el efecto de la estabilidad y del viento. La implementación publicada aquí fue desarrollada específicamente como complemento QGIS, con entradas geográficas, resultados georreferenciados e importación de observaciones meteorológicas.
 
-El caso Patache, con dominio de 10 × 10 km, resolución de 50 m, clase D, emisión de 40 g/s, viento de 5 m/s medido a 10 m y chimenea de 50 m, produce un máximo de 221,557 µg/m³ y un máximo periférico de 57,279 µg/m³. La salida se declara truncada porque la pluma alcanza el borde.
+### Referencias
+
+- Masters, G. M. y Ela, W. P. (2008). *Introduction to Environmental Engineering and Science* (3.ª ed., capítulo 7). Prentice Hall. ISBN 978-0-13-148193-0. [Ficha editorial de Pearson](https://www.pearson.com/en-us/subject-catalog/p/introduction-to-environmental-engineering-and-science/P200000003392).
+- Connolly, P. J. (2017). *Gaussian plume model practical* [software docente]. University of Manchester. [Repositorio consultado, commit `7aaadea`](https://github.com/EnvModelling/gaussian-plume-model-practical/tree/7aaadeae4f7217ec658c20ff70939066ffd2da83).
 
 ## Código fuente
 
 El repositorio se concentra en el complemento QGIS y su implementación en Python:
 
 - `qgis_plugin/gaussian_educativo/`: paquete instalable del complemento;
-- `docs/`: fundamento, compatibilidad y procedimientos de validación;
+- `docs/`: fundamento físico y documentación técnica;
 - `examples/`: escenarios y tablas sintéticas redistribuibles;
 - `tests/`: pruebas del núcleo numérico y espacial;
 - `scripts/`: construcción del ZIP y comprobaciones reproducibles;

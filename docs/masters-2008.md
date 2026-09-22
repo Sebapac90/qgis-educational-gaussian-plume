@@ -19,4 +19,7 @@ Las ecuaciones de sigma se aplican directamente donde producen valores positivos
 
 ## Referencia bibliográfica
 
-Masters, G. M. y Ela, W. P. (2008). *Introducción a la ingeniería medioambiental*, 3.ª edición, capítulo 7. Los coeficientes de dispersión de la Tabla 7.8 se atribuyen allí a Martin (1976).
+Masters, G. M. y Ela, W. P. (2008). *Introduction to Environmental Engineering
+and Science*, 3.ª edición, capítulo 7. Prentice Hall. ISBN
+978-0-13-148193-0. Los coeficientes de dispersión de la Tabla 7.8 se atribuyen
+allí a Martin (1976).
