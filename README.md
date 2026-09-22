@@ -1,5 +1,7 @@
 # Pluma Gaussiana Educativa para QGIS
 
+Repositorio: <https://github.com/Sebapac90/qgis-educational-gaussian-plume>
+
 Complemento docente para explorar una pluma gaussiana estacionaria sobre terreno plano. El modelo físico sigue a Masters y Ela (2008), capítulo 7: clases de estabilidad A–F, coeficientes de dispersión de Martin (1976), reflexión perfecta en el suelo y corrección de la rapidez del viento por altura.
 
 No es un modelo regulatorio. No representa terreno, edificios, deposición, química, variación vertical de la dirección ni ascenso de pluma.
