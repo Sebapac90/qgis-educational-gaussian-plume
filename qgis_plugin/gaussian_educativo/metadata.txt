@@ -1,7 +1,10 @@
 [general]
 name=Pluma Gaussiana Educativa
-description=Simulación docente de una pluma gaussiana sobre una grilla local.
-about=MVP: parámetros principales en el panel, selección de fuente, ejecución en segundo plano, viento constante o CSV y salidas agrupadas y estilizadas. No es un modelo regulatorio.
+description=Educational Gaussian plume simulations with georeferenced outputs and wind observations.
+about=Educational, non-regulatory steady-state Gaussian plume plugin based on Masters and Ela (2008).
+    Students can select stability A-F, adjust wind speed from its measurement height, use constant, synthetic or CSV wind data, and create georeferenced raster, isoline, source and wind-rose outputs.
+    Unlike AirEmergency, this plugin focuses on teaching the classical flat-terrain model and does not simulate terrain, dry deposition, fire releases or plume rise.
+    The interface is available in Spanish and English. It uses NumPy, PyProj and Matplotlib from the QGIS Python environment.
 version=0.14.0
 qgisMinimumVersion=3.40
 qgisMaximumVersion=3.99
@@ -11,6 +14,10 @@ homepage=https://github.com/Sebapac90/qgis-educational-gaussian-plume
 tracker=https://github.com/Sebapac90/qgis-educational-gaussian-plume/issues
 repository=https://github.com/Sebapac90/qgis-educational-gaussian-plume
 category=Raster
+icon=icons/chimney.png
 experimental=True
-hasProcessingProvider=yes
-tags=gaussian,plume,air quality,education,dispersion
+deprecated=False
+server=False
+hasProcessingProvider=True
+tags=gaussian plume,air quality,education,atmospheric dispersion,wind rose
+changelog=0.14.0 - First public experimental release. Masters and Ela formulation, constant and observed wind modes, georeferenced outputs, bilingual interface and reproducible scenarios.
