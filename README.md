@@ -80,7 +80,7 @@ El repositorio se concentra en el complemento QGIS y su implementación en Pytho
 - `scripts/`: construcción del ZIP y comprobaciones reproducibles;
 - `validation/`: evidencia compacta de las pruebas aceptadas.
 
-El núcleo físico permanece independiente de la interfaz QGIS para que sus ecuaciones puedan probarse directamente. Los notebooks exploratorios y los datos meteorológicos originales se conservan fuera de la publicación.
+El núcleo físico permanece independiente de la interfaz QGIS para que sus ecuaciones puedan probarse directamente. Los datos meteorológicos originales se conservan fuera de la publicación.
 
 ## Licencia
 
