@@ -1,3 +1,6 @@
+# Copyright (C) 2026 Sebastián Pacheco Mercado
+# SPDX-License-Identifier: GPL-2.0-or-later
+
 """Register Processing and expose the small interactive QGIS dock."""
 from .i18n import tr
 from pathlib import Path

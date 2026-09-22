@@ -87,4 +87,7 @@ El núcleo físico permanece independiente de la interfaz QGIS para que sus ecua
 
 ## Licencia
 
-Código distribuido bajo GNU GPL versión 2 o posterior. Véase [LICENSE](LICENSE).
+Copyright © 2026 Sebastián Pacheco Mercado.
+
+Código distribuido bajo GNU GPL versión 2 o posterior
+(`SPDX-License-Identifier: GPL-2.0-or-later`). Véase [LICENSE](LICENSE).

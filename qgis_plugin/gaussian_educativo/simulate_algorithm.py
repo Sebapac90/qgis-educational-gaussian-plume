@@ -1,3 +1,6 @@
+# Copyright (C) 2026 Sebastián Pacheco Mercado
+# SPDX-License-Identifier: GPL-2.0-or-later
+
 """Processing vertical slice: source, constant wind and styled QGIS outputs."""
 from .i18n import tr
 from . import i18n

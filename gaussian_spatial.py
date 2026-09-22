@@ -1,3 +1,6 @@
+# Copyright (C) 2026 Sebastián Pacheco Mercado
+# SPDX-License-Identifier: GPL-2.0-or-later
+
 """Local flat-ground plume in a WGS84 UTM/UPS CRS; no QGIS dependency.
 
 Wind input is meteorological FROM, clockwise from true north. UTM meridian

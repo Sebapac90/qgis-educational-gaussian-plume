@@ -1,3 +1,6 @@
+# Copyright (C) 2026 Sebastián Pacheco Mercado
+# SPDX-License-Identifier: GPL-2.0-or-later
+
 """Explicit mass-rate and concentration conversions around the SI core."""
 import math
 

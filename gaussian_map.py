@@ -1,3 +1,6 @@
+# Copyright (C) 2026 Sebastián Pacheco Mercado
+# SPDX-License-Identifier: GPL-2.0-or-later
+
 """Notebook/browser display of computed georeferenced raster; optional UI layer."""
 from html import escape
 import math

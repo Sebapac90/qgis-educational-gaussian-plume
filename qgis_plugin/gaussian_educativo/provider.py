@@ -1,3 +1,6 @@
+# Copyright (C) 2026 Sebastián Pacheco Mercado
+# SPDX-License-Identifier: GPL-2.0-or-later
+
 """Processing provider for educational Gaussian plume algorithms."""
 from .i18n import tr
 from qgis.core import QgsProcessingProvider

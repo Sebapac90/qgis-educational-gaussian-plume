@@ -1,3 +1,6 @@
+# Copyright (C) 2026 Sebastián Pacheco Mercado
+# SPDX-License-Identifier: GPL-2.0-or-later
+
 """Screen-space contour lettering for the Folium preview, without GIS changes."""
 from branca.element import MacroElement, Template
 

@@ -1,3 +1,6 @@
+# Copyright (C) 2026 Sebastián Pacheco Mercado
+# SPDX-License-Identifier: GPL-2.0-or-later
+
 """Normalize user-selected wind CSV columns without depending on QGIS."""
 from collections import Counter
 from dataclasses import asdict, dataclass

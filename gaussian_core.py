@@ -1,3 +1,6 @@
+# Copyright (C) 2026 Sebastián Pacheco Mercado
+# SPDX-License-Identifier: GPL-2.0-or-later
+
 """Steady point-source Gaussian plume, independent of GIS.
 
 Inputs: metres, kg/s, m/s. Output: kg/m³. Coordinates are already in the

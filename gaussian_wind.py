@@ -1,3 +1,6 @@
+# Copyright (C) 2026 Sebastián Pacheco Mercado
+# SPDX-License-Identifier: GPL-2.0-or-later
+
 """Wind regimes and weighted tables around the stationary Gaussian core."""
 from dataclasses import dataclass
 from datetime import datetime, timedelta
