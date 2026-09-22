@@ -1,0 +1,99 @@
+{
+  "status": "accepted",
+  "scope": "Educational MVP; not regulatory equivalence",
+  "criteria_source": {
+    "robustness": "validation/wind_aggregation_robustness.json",
+    "qgis": "validation/qgis_processing_algorithm.json"
+  },
+  "manual_visual_review": {
+    "artifact": "outputs/qgis_plugin/vista_mvp_040_viento_csv.png",
+    "result": "passed",
+    "observations": "Continuous lobes and contours; no 16-sector radial banding"
+  },
+  "checks": [
+    {
+      "name": "rose direction sectors",
+      "observed": 16,
+      "relation": "==",
+      "limit": 16,
+      "passed": true
+    },
+    {
+      "name": "calculation direction sectors",
+      "observed": 72,
+      "relation": "==",
+      "limit": 72,
+      "passed": true
+    },
+    {
+      "name": "prevailing worst maximum difference (%)",
+      "observed": 2.896137122578506,
+      "relation": "<=",
+      "limit": 5.0,
+      "passed": true
+    },
+    {
+      "name": "prevailing worst normalized RMSE (%)",
+      "observed": 0.3222361367794234,
+      "relation": "<=",
+      "limit": 1.0,
+      "passed": true
+    },
+    {
+      "name": "prevailing minimum pixel correlation",
+      "observed": 0.999783471193037,
+      "relation": ">=",
+      "limit": 0.995,
+      "passed": true
+    },
+    {
+      "name": "prevailing minimum speedup",
+      "observed": 16.440518107050227,
+      "relation": ">=",
+      "limit": 10.0,
+      "passed": true
+    },
+    {
+      "name": "real tables worst maximum difference (%)",
+      "observed": 1.0114293226202564,
+      "relation": "<=",
+      "limit": 5.0,
+      "passed": true
+    },
+    {
+      "name": "real tables worst normalized RMSE (%)",
+      "observed": 0.385448196622634,
+      "relation": "<=",
+      "limit": 1.0,
+      "passed": true
+    },
+    {
+      "name": "real tables minimum pixel correlation",
+      "observed": 0.999135756730065,
+      "relation": ">=",
+      "limit": 0.995,
+      "passed": true
+    },
+    {
+      "name": "QGIS processing suite",
+      "observed": "passed",
+      "relation": "==",
+      "limit": "passed",
+      "passed": true
+    },
+    {
+      "name": "QGIS CSV rose is PNG",
+      "observed": true,
+      "relation": "==",
+      "limit": true,
+      "passed": true
+    },
+    {
+      "name": "QGIS CSV calculation classes below input rows",
+      "observed": true,
+      "relation": "==",
+      "limit": true,
+      "passed": true
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+[general]
+name=Pluma Gaussiana Educativa
+description=Simulación docente de una pluma gaussiana sobre una grilla local.
+about=MVP: parámetros principales en el panel, selección de fuente, ejecución en segundo plano, viento constante o CSV y salidas agrupadas y estilizadas. No es un modelo regulatorio.
+version=0.14.0
+qgisMinimumVersion=3.40
+qgisMaximumVersion=3.99
+author=Sebastián Pacheco Mercado
+email=
+category=Raster
+experimental=True
+hasProcessingProvider=yes
+tags=gaussian,plume,air quality,education,dispersion

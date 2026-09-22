@@ -1,0 +1,11 @@
+{
+  "model": "Masters and Ela (2008), equations 7.47-7.48, Table 7.8",
+  "python": "3.12.0",
+  "numpy": "1.26.2",
+  "tests_run": 60,
+  "failures": 0,
+  "errors": 0,
+  "centreline_cases": 6,
+  "max_relative_error_six_centreline_cases": 0.0,
+  "scope": "Equation and software checks; not field or regulatory validation"
+}

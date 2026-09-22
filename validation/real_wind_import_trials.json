@@ -1,0 +1,152 @@
+{
+  "status": "passed",
+  "dmc": {
+    "station": "Teniente Vidal, Coyhaique Ad. (450004)",
+    "source": "https://climatologia.meteochile.gob.cl/application/diariob/graficosRecienteEma/450004/2026/08/DD",
+    "source_interval": "1 minute; sampled every 15 minutes",
+    "source_speed_unit": "km/h",
+    "source_time_zone": "America/Santiago",
+    "zero_speed_policy": "omitted because the stationary Gaussian core requires positive speed"
+  },
+  "noaa": {
+    "station": "JFK International Airport, NY US (74486094789)",
+    "source": "https://www.ncei.noaa.gov/data/global-hourly/access/2025/74486094789.csv",
+    "source_field": "hourly FM-15 WND decoded as direction degrees and tenths of m/s",
+    "source_time_zone": "UTC",
+    "zero_speed_policy": "omitted because the stationary Gaussian core requires positive speed"
+  },
+  "trials": {
+    "dmc_6h": {
+      "rows": 24,
+      "start_utc": "2026-08-01T10:00:00Z",
+      "end_utc": "2026-08-01T15:45:00Z",
+      "predominant_interval_seconds": 900,
+      "irregular_intervals": 0,
+      "speed_unit_original": "km/h",
+      "direction_convention_original": "from",
+      "source_csv": "examples/real_wind/dmc_6h_source.csv",
+      "ready_csv": "examples/real_wind/dmc_6h_ready.csv",
+      "wind_rose": "examples/real_wind/dmc_6h_rose.png",
+      "representative_from_deg": 175.67591988390168,
+      "mean_speed_m_s": 1.1319444583333333,
+      "calculation_test": {
+        "source": "Patache teaching coordinate",
+        "grid": "2 km x 2 km at 100 m",
+        "emission_kg_s": 0.04,
+        "effective_height_m": 50,
+        "stability": "D",
+        "maximum_kg_m3": 4.6462742713036227e-07
+      }
+    },
+    "dmc_day": {
+      "rows": 96,
+      "start_utc": "2026-08-01T04:00:00Z",
+      "end_utc": "2026-08-02T03:45:00Z",
+      "predominant_interval_seconds": 900,
+      "irregular_intervals": 0,
+      "speed_unit_original": "km/h",
+      "direction_convention_original": "from",
+      "source_csv": "examples/real_wind/dmc_day_source.csv",
+      "ready_csv": "examples/real_wind/dmc_day_ready.csv",
+      "wind_rose": "examples/real_wind/dmc_day_rose.png",
+      "representative_from_deg": 236.79351564463497,
+      "mean_speed_m_s": 2.1443865729166665,
+      "calculation_test": {
+        "source": "Patache teaching coordinate",
+        "grid": "2 km x 2 km at 100 m",
+        "emission_kg_s": 0.04,
+        "effective_height_m": 50,
+        "stability": "D",
+        "maximum_kg_m3": 1.6356087497547235e-07
+      }
+    },
+    "dmc_month": {
+      "rows": 2954,
+      "start_utc": "2026-08-01T04:00:00Z",
+      "end_utc": "2026-09-01T03:45:00Z",
+      "predominant_interval_seconds": 900,
+      "irregular_intervals": 18,
+      "speed_unit_original": "km/h",
+      "direction_convention_original": "from",
+      "source_csv": "examples/real_wind/dmc_month_source.csv",
+      "ready_csv": "examples/real_wind/dmc_month_ready.csv",
+      "wind_rose": "examples/real_wind/dmc_month_rose.png",
+      "representative_from_deg": 341.95159011206766,
+      "mean_speed_m_s": 2.5357425003385234,
+      "calculation_test": {
+        "source": "Patache teaching coordinate",
+        "grid": "2 km x 2 km at 100 m",
+        "emission_kg_s": 0.04,
+        "effective_height_m": 50,
+        "stability": "D",
+        "maximum_kg_m3": 6.49336541700564e-08
+      }
+    },
+    "noaa_6h": {
+      "rows": 6,
+      "start_utc": "2025-01-15T06:51:00Z",
+      "end_utc": "2025-01-15T11:51:00Z",
+      "predominant_interval_seconds": 3600,
+      "irregular_intervals": 0,
+      "speed_unit_original": "m/s",
+      "direction_convention_original": "from",
+      "source_csv": "examples/real_wind/noaa_6h_source.csv",
+      "ready_csv": "examples/real_wind/noaa_6h_ready.csv",
+      "wind_rose": "examples/real_wind/noaa_6h_rose.png",
+      "representative_from_deg": 300.0,
+      "mean_speed_m_s": 8.683333333333335,
+      "calculation_test": {
+        "source": "Patache teaching coordinate",
+        "grid": "2 km x 2 km at 100 m",
+        "emission_kg_s": 0.04,
+        "effective_height_m": 50,
+        "stability": "D",
+        "maximum_kg_m3": 1.3918060969303886e-07
+      }
+    },
+    "noaa_day": {
+      "rows": 24,
+      "start_utc": "2025-01-15T00:51:00Z",
+      "end_utc": "2025-01-15T23:51:00Z",
+      "predominant_interval_seconds": 3600,
+      "irregular_intervals": 0,
+      "speed_unit_original": "m/s",
+      "direction_convention_original": "from",
+      "source_csv": "examples/real_wind/noaa_day_source.csv",
+      "ready_csv": "examples/real_wind/noaa_day_ready.csv",
+      "wind_rose": "examples/real_wind/noaa_day_rose.png",
+      "representative_from_deg": 309.6229020213978,
+      "mean_speed_m_s": 8.991666666666667,
+      "calculation_test": {
+        "source": "Patache teaching coordinate",
+        "grid": "2 km x 2 km at 100 m",
+        "emission_kg_s": 0.04,
+        "effective_height_m": 50,
+        "stability": "D",
+        "maximum_kg_m3": 5.7997950544423986e-08
+      }
+    },
+    "noaa_month": {
+      "rows": 723,
+      "start_utc": "2025-01-01T00:51:00Z",
+      "end_utc": "2025-01-31T23:51:00Z",
+      "predominant_interval_seconds": 3600,
+      "irregular_intervals": 16,
+      "speed_unit_original": "m/s",
+      "direction_convention_original": "from",
+      "source_csv": "examples/real_wind/noaa_month_source.csv",
+      "ready_csv": "examples/real_wind/noaa_month_ready.csv",
+      "wind_rose": "examples/real_wind/noaa_month_rose.png",
+      "representative_from_deg": 282.59042696609396,
+      "mean_speed_m_s": 6.7149377593361,
+      "calculation_test": {
+        "source": "Patache teaching coordinate",
+        "grid": "2 km x 2 km at 100 m",
+        "emission_kg_s": 0.04,
+        "effective_height_m": 50,
+        "stability": "D",
+        "maximum_kg_m3": 3.3140110007103344e-08
+      }
+    }
+  }
+}

@@ -1,0 +1,34 @@
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+.DS_Store
+
+# Local builds, backups and generated simulation products
+.backups/
+build/
+dist/
+outputs/
+
+# Machine-specific editor configuration
+.vscode/settings.json
+
+# Local development instructions and preserved historical material
+AGENTS.md
+reference/
+THIRD_PARTY_LICENSE.txt
+
+# Real meteorological extracts are retained locally; redistribution is not bundled.
+examples/real_wind/
+
+# Publish only compact, portable validation evidence.
+validation/*
+!validation/centreline_cases.csv
+!validation/domain_sensitivity.json
+!validation/prevailing_method_comparison.csv
+!validation/prevailing_method_comparison.json
+!validation/prevailing_method_comparison.png
+!validation/real_wind_import_trials.json
+!validation/summary.json
+!validation/wind_aggregation_acceptance.json
+!validation/wind_aggregation_robustness.json

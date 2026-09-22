@@ -1,0 +1,6 @@
+-r requirements-notebook.txt
+pyproj>=3.6,<4
+rasterio>=1.4,<2
+# Baseline verified with Rasterio 1.4.4 in gee; keep the tested attrs release family.
+attrs>=26.1,<27
+folium>=0.14,<1

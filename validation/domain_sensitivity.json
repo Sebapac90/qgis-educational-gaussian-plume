@@ -1,0 +1,150 @@
+{
+  "scenario": {
+    "title": "Pluma gaussiana · Patache",
+    "source": {
+      "coordinates": {
+        "crs": "EPSG:4326",
+        "x": -70.193195,
+        "y": -20.80532
+      },
+      "calculation_crs": "auto",
+      "coordinate_status": "Ubicación referencial de la central; no es levantamiento de chimenea",
+      "coordinate_source": "https://www.gem.wiki/Patache_power_station"
+    },
+    "model": {
+      "emission_value": 40.0,
+      "emission_unit": "g/s",
+      "wind_speed_m_s": 5.0,
+      "wind_reference_height_m": 10.0,
+      "wind_exposure": "rough",
+      "wind_mode": "constant",
+      "wind_hours": 1200,
+      "wind_direction_std_deg": 40.0,
+      "wind_random_seed": 22001,
+      "effective_height_m": 50.0,
+      "stability": "D",
+      "wind_from_deg": 0.0
+    },
+    "grid": {
+      "width_m": 10000.0,
+      "height_m": 10000.0,
+      "resolution_m": 50.0
+    },
+    "display": {
+      "concentration_unit": "ug/m3",
+      "raster_minimum": 0.1,
+      "contour_minimum": 1.0,
+      "contour_levels": "auto_125_upper"
+    },
+    "purpose": "Caso docente hipotético; prueba geográfica sobre terreno plano, no reconstrucción de emisiones de la central"
+  },
+  "experiment": "Centred squares; unchanged pixel spacing",
+  "scope": "Numerical sensitivity only; no empirical validity at long range",
+  "results": [
+    {
+      "side_m": 10000,
+      "cells": 40000,
+      "concentration_unit": "ug/m3",
+      "maximum_concentration": 221.55702842230076,
+      "edge_maxima_concentration": {
+        "north": 0.0,
+        "south": 57.27933701364513,
+        "west": 7.965947518308017e-67,
+        "east": 3.9066946825995315e-63
+      },
+      "border_to_peak": 0.25853089573158267,
+      "visible_plume_reaches_domain_edge": true,
+      "maximum_ug_m3": 221.55702842230076,
+      "edge_maxima_ug_m3": {
+        "north": 0.0,
+        "south": 57.27933701364513,
+        "west": 7.965947518308017e-67,
+        "east": 3.9066946825995315e-63
+      }
+    },
+    {
+      "side_m": 20000,
+      "cells": 160000,
+      "concentration_unit": "ug/m3",
+      "maximum_concentration": 221.55702842230076,
+      "edge_maxima_concentration": {
+        "north": 0.0,
+        "south": 22.471041077097905,
+        "west": 5.140219446890612e-78,
+        "east": 9.745800051374384e-74
+      },
+      "border_to_peak": 0.10142328247094366,
+      "visible_plume_reaches_domain_edge": true,
+      "maximum_ug_m3": 221.55702842230076,
+      "edge_maxima_ug_m3": {
+        "north": 0.0,
+        "south": 22.471041077097905,
+        "west": 5.140219446890612e-78,
+        "east": 9.745800051374384e-74
+      }
+    },
+    {
+      "side_m": 40000,
+      "cells": 640000,
+      "concentration_unit": "ug/m3",
+      "maximum_concentration": 221.55702842230076,
+      "edge_maxima_concentration": {
+        "north": 0.0,
+        "south": 8.516715960622777,
+        "west": 6.556690832536268e-91,
+        "east": 5.9458340864191114e-86
+      },
+      "border_to_peak": 0.038440287908129075,
+      "visible_plume_reaches_domain_edge": true,
+      "maximum_ug_m3": 221.55702842230076,
+      "edge_maxima_ug_m3": {
+        "north": 0.0,
+        "south": 8.516715960622777,
+        "west": 6.556690832536268e-91,
+        "east": 5.9458340864191114e-86
+      }
+    },
+    {
+      "side_m": 80000,
+      "cells": 2560000,
+      "concentration_unit": "ug/m3",
+      "maximum_concentration": 221.55702842230076,
+      "edge_maxima_concentration": {
+        "north": 0.0,
+        "south": 3.1948007395198847,
+        "west": 8.983267536826437e-106,
+        "east": 4.98705000400886e-100
+      },
+      "border_to_peak": 0.014419767056229,
+      "visible_plume_reaches_domain_edge": true,
+      "maximum_ug_m3": 221.55702842230076,
+      "edge_maxima_ug_m3": {
+        "north": 0.0,
+        "south": 3.1948007395198847,
+        "west": 8.983267536826437e-106,
+        "east": 4.98705000400886e-100
+      }
+    },
+    {
+      "side_m": 100000,
+      "cells": 4000000,
+      "concentration_unit": "ug/m3",
+      "maximum_concentration": 221.55702842230076,
+      "edge_maxima_concentration": {
+        "north": 0.0,
+        "south": 2.3282188777767128,
+        "west": 5.00728877364199e-111,
+        "east": 5.283051114842714e-105
+      },
+      "border_to_peak": 0.010508440622966788,
+      "visible_plume_reaches_domain_edge": true,
+      "maximum_ug_m3": 221.55702842230076,
+      "edge_maxima_ug_m3": {
+        "north": 0.0,
+        "south": 2.3282188777767128,
+        "west": 5.00728877364199e-111,
+        "east": 5.283051114842714e-105
+      }
+    }
+  ]
+}

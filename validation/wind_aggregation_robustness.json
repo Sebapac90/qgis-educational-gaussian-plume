@@ -1,0 +1,1761 @@
+{
+  "status": "passed",
+  "grid": {
+    "width_m": 10000,
+    "height_m": 10000,
+    "resolution_m": 100
+  },
+  "physics": {
+    "emission_kg_s": 0.04,
+    "effective_height_m": 50,
+    "stability": "D"
+  },
+  "method": {
+    "exact": "one plume per observation",
+    "grouped": "72 direction sectors x 7 speed classes"
+  },
+  "prevailing_matrix_summary": {
+    "cases": 45,
+    "worst_absolute_maximum_difference_percent": 2.896137122578506,
+    "worst_normalized_rmse_percent": 0.3222361367794234,
+    "worst_normalized_mae_percent": 0.23799790283320094,
+    "minimum_pixel_correlation": 0.999783471193037,
+    "minimum_speedup": 16.440518107050227,
+    "maximum_speedup": 174.37954103256445
+  },
+  "prevailing_cases": [
+    {
+      "original_max_ug_m3": 194.69019658884937,
+      "grouped_max_ug_m3": 199.2821093292816,
+      "maximum_difference_percent": 2.358574196794072,
+      "normalized_rmse_percent": 0.19434206954854846,
+      "normalized_mae_percent": 0.04227995188547289,
+      "pixel_correlation": 0.9997886805277728,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 8.25,
+          "grouped": 8.1,
+          "difference_percent": -1.8181818181818226
+        },
+        "at_least_10_ug_m3": {
+          "original": 5.48,
+          "grouped": 5.36,
+          "difference_percent": -2.189781021897812
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.66,
+          "grouped": 0.6900000000000001,
+          "difference_percent": 4.545454545454549
+        }
+      },
+      "observations": 1200,
+      "groups": 7,
+      "exact_seconds": 0.5119548751972616,
+      "grouped_seconds": 0.002973583061248064,
+      "speedup": 172.16767268723453,
+      "centre_deg": 0.0,
+      "spread_deg": 5.0,
+      "seed": 22001
+    },
+    {
+      "original_max_ug_m3": 205.54432536007022,
+      "grouped_max_ug_m3": 210.92407756789723,
+      "maximum_difference_percent": 2.6173197427867794,
+      "normalized_rmse_percent": 0.18870104987726083,
+      "normalized_mae_percent": 0.041042086891177214,
+      "pixel_correlation": 0.9997879637946055,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 7.99,
+          "grouped": 7.8,
+          "difference_percent": -2.3779724655819825
+        },
+        "at_least_10_ug_m3": {
+          "original": 5.38,
+          "grouped": 5.26,
+          "difference_percent": -2.2304832713754665
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.66,
+          "grouped": 0.6900000000000001,
+          "difference_percent": 4.545454545454549
+        }
+      },
+      "observations": 1200,
+      "groups": 7,
+      "exact_seconds": 0.5074902079068124,
+      "grouped_seconds": 0.0030605411157011986,
+      "speedup": 165.81715086370983,
+      "centre_deg": 0.0,
+      "spread_deg": 5.0,
+      "seed": 22002
+    },
+    {
+      "original_max_ug_m3": 195.97769171865397,
+      "grouped_max_ug_m3": 200.69482412687984,
+      "maximum_difference_percent": 2.4069741646910465,
+      "normalized_rmse_percent": 0.18838514381820276,
+      "normalized_mae_percent": 0.04047949048135689,
+      "pixel_correlation": 0.9997918857511111,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 7.94,
+          "grouped": 7.75,
+          "difference_percent": -2.392947103274564
+        },
+        "at_least_10_ug_m3": {
+          "original": 5.53,
+          "grouped": 5.41,
+          "difference_percent": -2.1699819168173615
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.66,
+          "grouped": 0.68,
+          "difference_percent": 3.030303030303033
+        }
+      },
+      "observations": 1200,
+      "groups": 7,
+      "exact_seconds": 0.5073561668395996,
+      "grouped_seconds": 0.003019792027771473,
+      "speedup": 168.01030076697538,
+      "centre_deg": 0.0,
+      "spread_deg": 5.0,
+      "seed": 22003
+    },
+    {
+      "original_max_ug_m3": 120.2751176530514,
+      "grouped_max_ug_m3": 121.26444918043488,
+      "maximum_difference_percent": 0.8225571063146535,
+      "normalized_rmse_percent": 0.08384073091934971,
+      "normalized_mae_percent": 0.024809816246012993,
+      "pixel_correlation": 0.9999724007853459,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 14.450000000000001,
+          "grouped": 14.4,
+          "difference_percent": -0.34602076124567965
+        },
+        "at_least_10_ug_m3": {
+          "original": 8.1,
+          "grouped": 8.040000000000001,
+          "difference_percent": -0.7407407407407249
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.16,
+          "grouped": 0.16,
+          "difference_percent": 0.0
+        }
+      },
+      "observations": 1200,
+      "groups": 14,
+      "exact_seconds": 0.5084665841422975,
+      "grouped_seconds": 0.006136458832770586,
+      "speedup": 82.85993567282304,
+      "centre_deg": 0.0,
+      "spread_deg": 10.0,
+      "seed": 22001
+    },
+    {
+      "original_max_ug_m3": 127.50437466152866,
+      "grouped_max_ug_m3": 128.8045202659194,
+      "maximum_difference_percent": 1.0196870561046143,
+      "normalized_rmse_percent": 0.08619800918422171,
+      "normalized_mae_percent": 0.023786951052360873,
+      "pixel_correlation": 0.9999690473558503,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 13.82,
+          "grouped": 13.73,
+          "difference_percent": -0.6512301013024592
+        },
+        "at_least_10_ug_m3": {
+          "original": 7.94,
+          "grouped": 7.88,
+          "difference_percent": -0.7556675062972354
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.23,
+          "grouped": 0.23,
+          "difference_percent": 0.0
+        }
+      },
+      "observations": 1200,
+      "groups": 12,
+      "exact_seconds": 0.5160227911546826,
+      "grouped_seconds": 0.005195332691073418,
+      "speedup": 99.32430160657646,
+      "centre_deg": 0.0,
+      "spread_deg": 10.0,
+      "seed": 22002
+    },
+    {
+      "original_max_ug_m3": 119.218723966742,
+      "grouped_max_ug_m3": 120.35832040506268,
+      "maximum_difference_percent": 0.9558871294735537,
+      "normalized_rmse_percent": 0.08452903182617329,
+      "normalized_mae_percent": 0.024985074430027784,
+      "pixel_correlation": 0.999970752409438,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 13.32,
+          "grouped": 13.18,
+          "difference_percent": -1.0510510510510553
+        },
+        "at_least_10_ug_m3": {
+          "original": 8.39,
+          "grouped": 8.33,
+          "difference_percent": -0.7151370679380273
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.15,
+          "grouped": 0.15,
+          "difference_percent": 0.0
+        }
+      },
+      "observations": 1200,
+      "groups": 13,
+      "exact_seconds": 0.5104733337648213,
+      "grouped_seconds": 0.00560704106464982,
+      "speedup": 91.04148299950113,
+      "centre_deg": 0.0,
+      "spread_deg": 10.0,
+      "seed": 22003
+    },
+    {
+      "original_max_ug_m3": 64.06933077032791,
+      "grouped_max_ug_m3": 64.50802907318183,
+      "maximum_difference_percent": 0.6847243409276985,
+      "normalized_rmse_percent": 0.06686093582700235,
+      "normalized_mae_percent": 0.02428392274901364,
+      "pixel_correlation": 0.9999864034806519,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 28.36,
+          "grouped": 28.36,
+          "difference_percent": 0.0
+        },
+        "at_least_10_ug_m3": {
+          "original": 11.59,
+          "grouped": 11.59,
+          "difference_percent": 0.0
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 27,
+      "exact_seconds": 0.509957208763808,
+      "grouped_seconds": 0.011647833976894617,
+      "speedup": 43.78129099156045,
+      "centre_deg": 0.0,
+      "spread_deg": 20.0,
+      "seed": 22001
+    },
+    {
+      "original_max_ug_m3": 67.64954769986272,
+      "grouped_max_ug_m3": 67.85108977054955,
+      "maximum_difference_percent": 0.29792079554027495,
+      "normalized_rmse_percent": 0.06959058091485251,
+      "normalized_mae_percent": 0.030214455306373518,
+      "pixel_correlation": 0.9999843605772224,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 27.27,
+          "grouped": 27.19,
+          "difference_percent": -0.2933626696002871
+        },
+        "at_least_10_ug_m3": {
+          "original": 11.48,
+          "grouped": 11.48,
+          "difference_percent": 0.0
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 24,
+      "exact_seconds": 0.5057302908971906,
+      "grouped_seconds": 0.010259083006531,
+      "speedup": 49.29585720041833,
+      "centre_deg": 0.0,
+      "spread_deg": 20.0,
+      "seed": 22002
+    },
+    {
+      "original_max_ug_m3": 63.77141586514914,
+      "grouped_max_ug_m3": 64.14008194892756,
+      "maximum_difference_percent": 0.5781055332972512,
+      "normalized_rmse_percent": 0.07428763770508223,
+      "normalized_mae_percent": 0.029810371435616566,
+      "pixel_correlation": 0.9999828714194731,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 27.07,
+          "grouped": 26.91,
+          "difference_percent": -0.5910602142593282
+        },
+        "at_least_10_ug_m3": {
+          "original": 11.82,
+          "grouped": 11.81,
+          "difference_percent": -0.08460236886632645
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 24,
+      "exact_seconds": 0.5122938747517765,
+      "grouped_seconds": 0.01023833267390728,
+      "speedup": 50.03684594634963,
+      "centre_deg": 0.0,
+      "spread_deg": 20.0,
+      "seed": 22003
+    },
+    {
+      "original_max_ug_m3": 32.48783296117755,
+      "grouped_max_ug_m3": 32.66586517115035,
+      "maximum_difference_percent": 0.5479965690095219,
+      "normalized_rmse_percent": 0.16722324790214907,
+      "normalized_mae_percent": 0.09136865713135334,
+      "pixel_correlation": 0.9999445081188841,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 49.47,
+          "grouped": 49.42,
+          "difference_percent": -0.10107135637759684
+        },
+        "at_least_10_ug_m3": {
+          "original": 9.4,
+          "grouped": 9.39,
+          "difference_percent": -0.10638297872340198
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 52,
+      "exact_seconds": 0.5152493747882545,
+      "grouped_seconds": 0.02199820801615715,
+      "speedup": 23.422333965103718,
+      "centre_deg": 0.0,
+      "spread_deg": 40.0,
+      "seed": 22001
+    },
+    {
+      "original_max_ug_m3": 37.43595007378377,
+      "grouped_max_ug_m3": 37.89423732004477,
+      "maximum_difference_percent": 1.2241902378803011,
+      "normalized_rmse_percent": 0.18277240155507507,
+      "normalized_mae_percent": 0.08634775008969894,
+      "pixel_correlation": 0.999917817369184,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 48.480000000000004,
+          "grouped": 48.480000000000004,
+          "difference_percent": 0.0
+        },
+        "at_least_10_ug_m3": {
+          "original": 9.67,
+          "grouped": 9.68,
+          "difference_percent": 0.10341261633919117
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 46,
+      "exact_seconds": 0.5455745831131935,
+      "grouped_seconds": 0.02064645802602172,
+      "speedup": 26.42460912305538,
+      "centre_deg": 0.0,
+      "spread_deg": 40.0,
+      "seed": 22002
+    },
+    {
+      "original_max_ug_m3": 33.29577831581248,
+      "grouped_max_ug_m3": 33.544880750287774,
+      "maximum_difference_percent": 0.7481502072501366,
+      "normalized_rmse_percent": 0.14849394363765062,
+      "normalized_mae_percent": 0.07737445140456159,
+      "pixel_correlation": 0.9999530291211941,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 49.76,
+          "grouped": 49.730000000000004,
+          "difference_percent": -0.06028938906751213
+        },
+        "at_least_10_ug_m3": {
+          "original": 9.19,
+          "grouped": 9.16,
+          "difference_percent": -0.32644178454841527
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 47,
+      "exact_seconds": 0.5652439589612186,
+      "grouped_seconds": 0.02009737491607666,
+      "speedup": 28.125263190918446,
+      "centre_deg": 0.0,
+      "spread_deg": 40.0,
+      "seed": 22003
+    },
+    {
+      "original_max_ug_m3": 18.38715311819716,
+      "grouped_max_ug_m3": 18.603917227812882,
+      "maximum_difference_percent": 1.1788889134838354,
+      "normalized_rmse_percent": 0.25267518844274534,
+      "normalized_mae_percent": 0.17277143583115098,
+      "pixel_correlation": 0.9998693478849272,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 81.60000000000001,
+          "grouped": 81.55,
+          "difference_percent": -0.06127450980393549
+        },
+        "at_least_10_ug_m3": {
+          "original": 4.3,
+          "grouped": 4.26,
+          "difference_percent": -0.9302325581395358
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 72,
+      "exact_seconds": 0.5175675828941166,
+      "grouped_seconds": 0.03108562482520938,
+      "speedup": 16.64974038013825,
+      "centre_deg": 0.0,
+      "spread_deg": 80.0,
+      "seed": 22001
+    },
+    {
+      "original_max_ug_m3": 20.147031474075675,
+      "grouped_max_ug_m3": 20.22472780862838,
+      "maximum_difference_percent": 0.3856465636274182,
+      "normalized_rmse_percent": 0.26089389904838495,
+      "normalized_mae_percent": 0.17238244661990842,
+      "pixel_correlation": 0.9998482675040166,
+      "peak_displacement_m": 100.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 78.29,
+          "grouped": 78.33,
+          "difference_percent": 0.05109209349852093
+        },
+        "at_least_10_ug_m3": {
+          "original": 4.5,
+          "grouped": 4.53,
+          "difference_percent": 0.6666666666666722
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 72,
+      "exact_seconds": 0.5175303746946156,
+      "grouped_seconds": 0.03147895773872733,
+      "speedup": 16.440518107050227,
+      "centre_deg": 0.0,
+      "spread_deg": 80.0,
+      "seed": 22002
+    },
+    {
+      "original_max_ug_m3": 17.426691690984967,
+      "grouped_max_ug_m3": 17.45238981643026,
+      "maximum_difference_percent": 0.1474641653216655,
+      "normalized_rmse_percent": 0.25341462712240803,
+      "normalized_mae_percent": 0.188458663957071,
+      "pixel_correlation": 0.9998746974170716,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 84.52,
+          "grouped": 84.4,
+          "difference_percent": -0.14197823000472118
+        },
+        "at_least_10_ug_m3": {
+          "original": 3.99,
+          "grouped": 4.03,
+          "difference_percent": 1.0025062656641612
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 72,
+      "exact_seconds": 0.517493249848485,
+      "grouped_seconds": 0.03060395922511816,
+      "speedup": 16.90935627125503,
+      "centre_deg": 0.0,
+      "spread_deg": 80.0,
+      "seed": 22003
+    },
+    {
+      "original_max_ug_m3": 209.97853060760957,
+      "grouped_max_ug_m3": 215.30779279688124,
+      "maximum_difference_percent": 2.5380033729403237,
+      "normalized_rmse_percent": 0.16867827074315025,
+      "normalized_mae_percent": 0.03732431309194919,
+      "pixel_correlation": 0.9998175918167459,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 8.3,
+          "grouped": 8.13,
+          "difference_percent": -2.048192771084336
+        },
+        "at_least_10_ug_m3": {
+          "original": 5.48,
+          "grouped": 5.37,
+          "difference_percent": -2.0072992700729984
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.62,
+          "grouped": 0.65,
+          "difference_percent": 4.838709677419359
+        }
+      },
+      "observations": 1200,
+      "groups": 8,
+      "exact_seconds": 0.5158822499215603,
+      "grouped_seconds": 0.0035557090304791927,
+      "speedup": 145.08562019542873,
+      "centre_deg": 2.5,
+      "spread_deg": 5.0,
+      "seed": 22001
+    },
+    {
+      "original_max_ug_m3": 212.06724177623698,
+      "grouped_max_ug_m3": 217.08757344581056,
+      "maximum_difference_percent": 2.3673301107347746,
+      "normalized_rmse_percent": 0.1751491507201659,
+      "normalized_mae_percent": 0.03761294645275832,
+      "pixel_correlation": 0.9997979622639596,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 8.0,
+          "grouped": 7.88,
+          "difference_percent": -1.5000000000000013
+        },
+        "at_least_10_ug_m3": {
+          "original": 5.39,
+          "grouped": 5.29,
+          "difference_percent": -1.8552875695732773
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.59,
+          "grouped": 0.61,
+          "difference_percent": 3.3898305084745797
+        }
+      },
+      "observations": 1200,
+      "groups": 7,
+      "exact_seconds": 0.5170497917570174,
+      "grouped_seconds": 0.0029650828801095486,
+      "speedup": 174.37954103256445,
+      "centre_deg": 2.5,
+      "spread_deg": 5.0,
+      "seed": 22002
+    },
+    {
+      "original_max_ug_m3": 206.24410229449333,
+      "grouped_max_ug_m3": 210.7309029776478,
+      "maximum_difference_percent": 2.1754807207761098,
+      "normalized_rmse_percent": 0.15393367724542148,
+      "normalized_mae_percent": 0.0347886303739235,
+      "pixel_correlation": 0.9998591465386705,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 8.0,
+          "grouped": 7.76,
+          "difference_percent": -3.0000000000000027
+        },
+        "at_least_10_ug_m3": {
+          "original": 5.5200000000000005,
+          "grouped": 5.39,
+          "difference_percent": -2.35507246376813
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.56,
+          "grouped": 0.6,
+          "difference_percent": 7.142857142857129
+        }
+      },
+      "observations": 1200,
+      "groups": 7,
+      "exact_seconds": 0.5065837502479553,
+      "grouped_seconds": 0.002960790880024433,
+      "speedup": 171.09744347894468,
+      "centre_deg": 2.5,
+      "spread_deg": 5.0,
+      "seed": 22003
+    },
+    {
+      "original_max_ug_m3": 123.36836643343894,
+      "grouped_max_ug_m3": 124.51735860632978,
+      "maximum_difference_percent": 0.9313507231294607,
+      "normalized_rmse_percent": 0.0824919362355283,
+      "normalized_mae_percent": 0.022839970816755758,
+      "pixel_correlation": 0.9999719073050689,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 14.47,
+          "grouped": 14.4,
+          "difference_percent": -0.48375950241879945
+        },
+        "at_least_10_ug_m3": {
+          "original": 8.1,
+          "grouped": 8.07,
+          "difference_percent": -0.37037037037036247
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.21,
+          "grouped": 0.22,
+          "difference_percent": 4.761904761904766
+        }
+      },
+      "observations": 1200,
+      "groups": 14,
+      "exact_seconds": 0.5079793753102422,
+      "grouped_seconds": 0.005928958300501108,
+      "speedup": 85.67767718442352,
+      "centre_deg": 2.5,
+      "spread_deg": 10.0,
+      "seed": 22001
+    },
+    {
+      "original_max_ug_m3": 124.18804322168053,
+      "grouped_max_ug_m3": 124.73734681882868,
+      "maximum_difference_percent": 0.4423160095755881,
+      "normalized_rmse_percent": 0.10234114872362741,
+      "normalized_mae_percent": 0.026750835917609437,
+      "pixel_correlation": 0.9999535206727954,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 13.82,
+          "grouped": 13.73,
+          "difference_percent": -0.6512301013024592
+        },
+        "at_least_10_ug_m3": {
+          "original": 7.91,
+          "grouped": 7.890000000000001,
+          "difference_percent": -0.25284450063210584
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.2,
+          "grouped": 0.22,
+          "difference_percent": 9.999999999999995
+        }
+      },
+      "observations": 1200,
+      "groups": 13,
+      "exact_seconds": 0.5076007917523384,
+      "grouped_seconds": 0.005591416731476784,
+      "speedup": 90.78214272508228,
+      "centre_deg": 2.5,
+      "spread_deg": 10.0,
+      "seed": 22002
+    },
+    {
+      "original_max_ug_m3": 120.70570672208167,
+      "grouped_max_ug_m3": 121.87045170861558,
+      "maximum_difference_percent": 0.9649460809799636,
+      "normalized_rmse_percent": 0.08132479116239189,
+      "normalized_mae_percent": 0.023268342421103046,
+      "pixel_correlation": 0.9999726264874913,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 13.38,
+          "grouped": 13.17,
+          "difference_percent": -1.5695067264574054
+        },
+        "at_least_10_ug_m3": {
+          "original": 8.39,
+          "grouped": 8.370000000000001,
+          "difference_percent": -0.23837902264600205
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.18,
+          "grouped": 0.19,
+          "difference_percent": 5.555555555555561
+        }
+      },
+      "observations": 1200,
+      "groups": 13,
+      "exact_seconds": 0.5077304155565798,
+      "grouped_seconds": 0.005580749828368425,
+      "speedup": 90.9788883521802,
+      "centre_deg": 2.5,
+      "spread_deg": 10.0,
+      "seed": 22003
+    },
+    {
+      "original_max_ug_m3": 64.00816538675589,
+      "grouped_max_ug_m3": 64.00336498198207,
+      "maximum_difference_percent": -0.007499675619229068,
+      "normalized_rmse_percent": 0.0888069217049361,
+      "normalized_mae_percent": 0.03548183682305093,
+      "pixel_correlation": 0.9999755186361056,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 28.37,
+          "grouped": 28.25,
+          "difference_percent": -0.4229820232640148
+        },
+        "at_least_10_ug_m3": {
+          "original": 11.6,
+          "grouped": 11.59,
+          "difference_percent": -0.0862068965517223
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 27,
+      "exact_seconds": 0.5099706668406725,
+      "grouped_seconds": 0.011483249720185995,
+      "speedup": 44.40996053096479,
+      "centre_deg": 2.5,
+      "spread_deg": 20.0,
+      "seed": 22001
+    },
+    {
+      "original_max_ug_m3": 68.80253285857655,
+      "grouped_max_ug_m3": 69.33792023925872,
+      "maximum_difference_percent": 0.7781506849212213,
+      "normalized_rmse_percent": 0.0873980947960004,
+      "normalized_mae_percent": 0.033567866780877545,
+      "pixel_correlation": 0.9999740419931883,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 27.27,
+          "grouped": 27.19,
+          "difference_percent": -0.2933626696002871
+        },
+        "at_least_10_ug_m3": {
+          "original": 11.4,
+          "grouped": 11.370000000000001,
+          "difference_percent": -0.2631578947368365
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 24,
+      "exact_seconds": 0.5084353750571609,
+      "grouped_seconds": 0.010571958031505346,
+      "speedup": 48.09282949686138,
+      "centre_deg": 2.5,
+      "spread_deg": 20.0,
+      "seed": 22002
+    },
+    {
+      "original_max_ug_m3": 64.47508075953215,
+      "grouped_max_ug_m3": 64.65977823006615,
+      "maximum_difference_percent": 0.28646334112065963,
+      "normalized_rmse_percent": 0.10051791322092647,
+      "normalized_mae_percent": 0.040251816036986986,
+      "pixel_correlation": 0.999967061042084,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 27.080000000000002,
+          "grouped": 26.95,
+          "difference_percent": -0.4800590841949873
+        },
+        "at_least_10_ug_m3": {
+          "original": 11.8,
+          "grouped": 11.84,
+          "difference_percent": 0.3389830508474504
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 25,
+      "exact_seconds": 0.5150708751752973,
+      "grouped_seconds": 0.010833708103746176,
+      "speedup": 47.543359138242934,
+      "centre_deg": 2.5,
+      "spread_deg": 20.0,
+      "seed": 22003
+    },
+    {
+      "original_max_ug_m3": 32.91764586196722,
+      "grouped_max_ug_m3": 32.89875388381251,
+      "maximum_difference_percent": -0.057391644086362985,
+      "normalized_rmse_percent": 0.13195161560399962,
+      "normalized_mae_percent": 0.07301444761933919,
+      "pixel_correlation": 0.9999644660827025,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 49.54,
+          "grouped": 49.46,
+          "difference_percent": -0.1614856681469485
+        },
+        "at_least_10_ug_m3": {
+          "original": 9.39,
+          "grouped": 9.39,
+          "difference_percent": 0.0
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 51,
+      "exact_seconds": 0.5137901669368148,
+      "grouped_seconds": 0.021815666928887367,
+      "speedup": 23.551430658142106,
+      "centre_deg": 2.5,
+      "spread_deg": 40.0,
+      "seed": 22001
+    },
+    {
+      "original_max_ug_m3": 37.2585128625435,
+      "grouped_max_ug_m3": 37.665547999742465,
+      "maximum_difference_percent": 1.0924621138278618,
+      "normalized_rmse_percent": 0.13221797468162988,
+      "normalized_mae_percent": 0.06742542471825826,
+      "pixel_correlation": 0.9999574269527899,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 48.44,
+          "grouped": 48.42,
+          "difference_percent": -0.041288191577200706
+        },
+        "at_least_10_ug_m3": {
+          "original": 9.63,
+          "grouped": 9.64,
+          "difference_percent": 0.10384215991692405
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 47,
+      "exact_seconds": 0.5112021663226187,
+      "grouped_seconds": 0.019989916123449802,
+      "speedup": 25.573002065923472,
+      "centre_deg": 2.5,
+      "spread_deg": 40.0,
+      "seed": 22002
+    },
+    {
+      "original_max_ug_m3": 33.25350283576181,
+      "grouped_max_ug_m3": 33.34523639404671,
+      "maximum_difference_percent": 0.27586133929400986,
+      "normalized_rmse_percent": 0.12871246444704496,
+      "normalized_mae_percent": 0.06971611152502624,
+      "pixel_correlation": 0.9999648774677278,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 49.77,
+          "grouped": 49.7,
+          "difference_percent": -0.1406469760900146
+        },
+        "at_least_10_ug_m3": {
+          "original": 9.18,
+          "grouped": 9.17,
+          "difference_percent": -0.10893246187363602
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 47,
+      "exact_seconds": 0.5315987910144031,
+      "grouped_seconds": 0.020036083180457354,
+      "speedup": 26.532071474573932,
+      "centre_deg": 2.5,
+      "spread_deg": 40.0,
+      "seed": 22003
+    },
+    {
+      "original_max_ug_m3": 18.27923661799912,
+      "grouped_max_ug_m3": 18.457085891458853,
+      "maximum_difference_percent": 0.9729578820846606,
+      "normalized_rmse_percent": 0.24332845726902258,
+      "normalized_mae_percent": 0.17542302582176808,
+      "pixel_correlation": 0.9998798122600733,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 81.52,
+          "grouped": 81.44,
+          "difference_percent": -0.09813542688910488
+        },
+        "at_least_10_ug_m3": {
+          "original": 4.28,
+          "grouped": 4.26,
+          "difference_percent": -0.467289719626179
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 72,
+      "exact_seconds": 0.5318180830217898,
+      "grouped_seconds": 0.030843499582260847,
+      "speedup": 17.242468922938194,
+      "centre_deg": 2.5,
+      "spread_deg": 80.0,
+      "seed": 22001
+    },
+    {
+      "original_max_ug_m3": 20.12536905957736,
+      "grouped_max_ug_m3": 20.07369423727849,
+      "maximum_difference_percent": -0.25676459470577506,
+      "normalized_rmse_percent": 0.27305562118757454,
+      "normalized_mae_percent": 0.19078226645629337,
+      "pixel_correlation": 0.9998353241443124,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 78.36,
+          "grouped": 78.27,
+          "difference_percent": -0.11485451761103038
+        },
+        "at_least_10_ug_m3": {
+          "original": 4.49,
+          "grouped": 4.51,
+          "difference_percent": 0.44543429844097043
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 72,
+      "exact_seconds": 0.5135881253518164,
+      "grouped_seconds": 0.0309516666457057,
+      "speedup": 16.5932300586816,
+      "centre_deg": 2.5,
+      "spread_deg": 80.0,
+      "seed": 22002
+    },
+    {
+      "original_max_ug_m3": 17.226070173464336,
+      "grouped_max_ug_m3": 17.40517415761127,
+      "maximum_difference_percent": 1.0397263121732248,
+      "normalized_rmse_percent": 0.3222361367794234,
+      "normalized_mae_percent": 0.23799790283320094,
+      "pixel_correlation": 0.9998027495157935,
+      "peak_displacement_m": 223.60679774997897,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 84.42,
+          "grouped": 84.22,
+          "difference_percent": -0.23691068467188206
+        },
+        "at_least_10_ug_m3": {
+          "original": 3.92,
+          "grouped": 3.97,
+          "difference_percent": 1.2755102040816395
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 72,
+      "exact_seconds": 0.5130919171497226,
+      "grouped_seconds": 0.030729542020708323,
+      "speedup": 16.69702453762426,
+      "centre_deg": 2.5,
+      "spread_deg": 80.0,
+      "seed": 22003
+    },
+    {
+      "original_max_ug_m3": 210.08164603953216,
+      "grouped_max_ug_m3": 216.09739200464728,
+      "maximum_difference_percent": 2.863527622961927,
+      "normalized_rmse_percent": 0.19236730816299588,
+      "normalized_mae_percent": 0.049949368191196566,
+      "pixel_correlation": 0.999783471193037,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 12.3,
+          "grouped": 12.14,
+          "difference_percent": -1.3008130081300824
+        },
+        "at_least_10_ug_m3": {
+          "original": 8.52,
+          "grouped": 8.42,
+          "difference_percent": -1.1737089201877893
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.65,
+          "grouped": 0.66,
+          "difference_percent": 1.5384615384615399
+        }
+      },
+      "observations": 1200,
+      "groups": 7,
+      "exact_seconds": 0.5107574579305947,
+      "grouped_seconds": 0.0030052498914301395,
+      "speedup": 169.955070753712,
+      "centre_deg": 225.0,
+      "spread_deg": 5.0,
+      "seed": 22001
+    },
+    {
+      "original_max_ug_m3": 212.9652517322478,
+      "grouped_max_ug_m3": 218.82098936750359,
+      "maximum_difference_percent": 2.7496211647794784,
+      "normalized_rmse_percent": 0.19385704604930384,
+      "normalized_mae_percent": 0.05052754787444934,
+      "pixel_correlation": 0.999784546820641,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 11.97,
+          "grouped": 11.74,
+          "difference_percent": -1.9214703425229775
+        },
+        "at_least_10_ug_m3": {
+          "original": 8.44,
+          "grouped": 8.27,
+          "difference_percent": -2.014218009478672
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.64,
+          "grouped": 0.66,
+          "difference_percent": 3.1250000000000027
+        }
+      },
+      "observations": 1200,
+      "groups": 7,
+      "exact_seconds": 0.5165158342570066,
+      "grouped_seconds": 0.003084000200033188,
+      "speedup": 167.48242566633044,
+      "centre_deg": 225.0,
+      "spread_deg": 5.0,
+      "seed": 22002
+    },
+    {
+      "original_max_ug_m3": 206.6597192434379,
+      "grouped_max_ug_m3": 212.64486808986365,
+      "maximum_difference_percent": 2.896137122578506,
+      "normalized_rmse_percent": 0.19149851516995758,
+      "normalized_mae_percent": 0.0490711602387258,
+      "pixel_correlation": 0.9997844435540587,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 11.98,
+          "grouped": 11.74,
+          "difference_percent": -2.0033388981636078
+        },
+        "at_least_10_ug_m3": {
+          "original": 8.620000000000001,
+          "grouped": 8.51,
+          "difference_percent": -1.2761020881670673
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.62,
+          "grouped": 0.63,
+          "difference_percent": 1.612903225806453
+        }
+      },
+      "observations": 1200,
+      "groups": 7,
+      "exact_seconds": 0.5112322089262307,
+      "grouped_seconds": 0.003073415718972683,
+      "speedup": 166.34007751385963,
+      "centre_deg": 225.0,
+      "spread_deg": 5.0,
+      "seed": 22003
+    },
+    {
+      "original_max_ug_m3": 123.25511642599126,
+      "grouped_max_ug_m3": 124.35861115805857,
+      "maximum_difference_percent": 0.8952932454774835,
+      "normalized_rmse_percent": 0.08514604758299482,
+      "normalized_mae_percent": 0.02834300350466228,
+      "pixel_correlation": 0.9999727214036439,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 18.54,
+          "grouped": 18.51,
+          "difference_percent": -0.1618122977346148
+        },
+        "at_least_10_ug_m3": {
+          "original": 11.8,
+          "grouped": 11.73,
+          "difference_percent": -0.5932203389830533
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.16,
+          "grouped": 0.17,
+          "difference_percent": 6.250000000000005
+        }
+      },
+      "observations": 1200,
+      "groups": 14,
+      "exact_seconds": 0.5116630829870701,
+      "grouped_seconds": 0.005984290968626738,
+      "speedup": 85.50103690972189,
+      "centre_deg": 225.0,
+      "spread_deg": 10.0,
+      "seed": 22001
+    },
+    {
+      "original_max_ug_m3": 126.03617764968034,
+      "grouped_max_ug_m3": 127.07918809457215,
+      "maximum_difference_percent": 0.8275484581822738,
+      "normalized_rmse_percent": 0.09128058188859198,
+      "normalized_mae_percent": 0.02810232850508935,
+      "pixel_correlation": 0.9999689272339264,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 17.94,
+          "grouped": 17.89,
+          "difference_percent": -0.2787068004459348
+        },
+        "at_least_10_ug_m3": {
+          "original": 11.61,
+          "grouped": 11.51,
+          "difference_percent": -0.8613264427217885
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.2,
+          "grouped": 0.22,
+          "difference_percent": 9.999999999999995
+        }
+      },
+      "observations": 1200,
+      "groups": 12,
+      "exact_seconds": 0.5089083751663566,
+      "grouped_seconds": 0.005024749785661697,
+      "speedup": 101.28034168358886,
+      "centre_deg": 225.0,
+      "spread_deg": 10.0,
+      "seed": 22002
+    },
+    {
+      "original_max_ug_m3": 120.70088205692547,
+      "grouped_max_ug_m3": 121.36329005386867,
+      "maximum_difference_percent": 0.5488012893151766,
+      "normalized_rmse_percent": 0.08703653282468732,
+      "normalized_mae_percent": 0.0288247074497542,
+      "pixel_correlation": 0.999970537410207,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 17.52,
+          "grouped": 17.37,
+          "difference_percent": -0.8561643835616357
+        },
+        "at_least_10_ug_m3": {
+          "original": 12.17,
+          "grouped": 12.1,
+          "difference_percent": -0.5751848808545628
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.16,
+          "grouped": 0.16,
+          "difference_percent": 0.0
+        }
+      },
+      "observations": 1200,
+      "groups": 13,
+      "exact_seconds": 0.512659708969295,
+      "grouped_seconds": 0.005570125300437212,
+      "speedup": 92.0373746222648,
+      "centre_deg": 225.0,
+      "spread_deg": 10.0,
+      "seed": 22003
+    },
+    {
+      "original_max_ug_m3": 64.2188957612163,
+      "grouped_max_ug_m3": 64.49282406637401,
+      "maximum_difference_percent": 0.4265540568873257,
+      "normalized_rmse_percent": 0.06984072605511081,
+      "normalized_mae_percent": 0.025251660051732225,
+      "pixel_correlation": 0.9999856418443983,
+      "peak_displacement_m": 100.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 28.95,
+          "grouped": 28.95,
+          "difference_percent": 0.0
+        },
+        "at_least_10_ug_m3": {
+          "original": 13.86,
+          "grouped": 13.92,
+          "difference_percent": 0.4329004329004365
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 27,
+      "exact_seconds": 0.5146244158968329,
+      "grouped_seconds": 0.011731041595339775,
+      "speedup": 43.86860379910941,
+      "centre_deg": 225.0,
+      "spread_deg": 20.0,
+      "seed": 22001
+    },
+    {
+      "original_max_ug_m3": 68.66340151104353,
+      "grouped_max_ug_m3": 69.04829883513777,
+      "maximum_difference_percent": 0.5605567385593705,
+      "normalized_rmse_percent": 0.06982223193220861,
+      "normalized_mae_percent": 0.03017357300886899,
+      "pixel_correlation": 0.9999843217183148,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 28.12,
+          "grouped": 28.11,
+          "difference_percent": -0.035561877667146385
+        },
+        "at_least_10_ug_m3": {
+          "original": 14.06,
+          "grouped": 14.06,
+          "difference_percent": 0.0
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 24,
+      "exact_seconds": 0.5105204158462584,
+      "grouped_seconds": 0.010221665725111961,
+      "speedup": 49.94493359257906,
+      "centre_deg": 225.0,
+      "spread_deg": 20.0,
+      "seed": 22002
+    },
+    {
+      "original_max_ug_m3": 64.65425260044032,
+      "grouped_max_ug_m3": 65.04948252780171,
+      "maximum_difference_percent": 0.6112976509123124,
+      "normalized_rmse_percent": 0.07427488440996399,
+      "normalized_mae_percent": 0.030218856958652764,
+      "pixel_correlation": 0.9999830496907336,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 27.22,
+          "grouped": 27.17,
+          "difference_percent": -0.18368846436442748
+        },
+        "at_least_10_ug_m3": {
+          "original": 13.94,
+          "grouped": 13.92,
+          "difference_percent": -0.1434720229555206
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 24,
+      "exact_seconds": 0.5112860831432045,
+      "grouped_seconds": 0.010288999881595373,
+      "speedup": 49.69249577481056,
+      "centre_deg": 225.0,
+      "spread_deg": 20.0,
+      "seed": 22003
+    },
+    {
+      "original_max_ug_m3": 32.745058914938674,
+      "grouped_max_ug_m3": 33.061922456115916,
+      "maximum_difference_percent": 0.9676682579816114,
+      "normalized_rmse_percent": 0.16194919138126876,
+      "normalized_mae_percent": 0.08626868652785662,
+      "pixel_correlation": 0.9999479354572879,
+      "peak_displacement_m": 223.60679774997897,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 45.71,
+          "grouped": 45.71,
+          "difference_percent": 0.0
+        },
+        "at_least_10_ug_m3": {
+          "original": 9.44,
+          "grouped": 9.43,
+          "difference_percent": -0.10593220338982826
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 52,
+      "exact_seconds": 0.5123268747702241,
+      "grouped_seconds": 0.022247625049203634,
+      "speedup": 23.028384991078546,
+      "centre_deg": 225.0,
+      "spread_deg": 40.0,
+      "seed": 22001
+    },
+    {
+      "original_max_ug_m3": 37.58029365111286,
+      "grouped_max_ug_m3": 38.08899647651858,
+      "maximum_difference_percent": 1.3536424971247027,
+      "normalized_rmse_percent": 0.188049938172626,
+      "normalized_mae_percent": 0.09315277369700582,
+      "pixel_correlation": 0.9999136360186217,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 44.4,
+          "grouped": 44.4,
+          "difference_percent": 0.0
+        },
+        "at_least_10_ug_m3": {
+          "original": 9.67,
+          "grouped": 9.64,
+          "difference_percent": -0.3102378490175735
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 46,
+      "exact_seconds": 0.5631765420548618,
+      "grouped_seconds": 0.019927625078707933,
+      "speedup": 28.26109683569865,
+      "centre_deg": 225.0,
+      "spread_deg": 40.0,
+      "seed": 22002
+    },
+    {
+      "original_max_ug_m3": 33.5646822650365,
+      "grouped_max_ug_m3": 33.701008454427246,
+      "maximum_difference_percent": 0.4061596302752769,
+      "normalized_rmse_percent": 0.14714717399844088,
+      "normalized_mae_percent": 0.07538721215028397,
+      "pixel_correlation": 0.9999537410285526,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 46.67,
+          "grouped": 46.68,
+          "difference_percent": 0.021427040925643903
+        },
+        "at_least_10_ug_m3": {
+          "original": 9.16,
+          "grouped": 9.200000000000001,
+          "difference_percent": 0.43668122270743365
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 47,
+      "exact_seconds": 0.512337792199105,
+      "grouped_seconds": 0.02072383277118206,
+      "speedup": 24.722154335830513,
+      "centre_deg": 225.0,
+      "spread_deg": 40.0,
+      "seed": 22003
+    },
+    {
+      "original_max_ug_m3": 18.43666480433213,
+      "grouped_max_ug_m3": 18.615588099648775,
+      "maximum_difference_percent": 0.9704753935462607,
+      "normalized_rmse_percent": 0.25357092944034465,
+      "normalized_mae_percent": 0.17706168591875873,
+      "pixel_correlation": 0.9998675140071613,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 84.34,
+          "grouped": 84.34,
+          "difference_percent": 0.0
+        },
+        "at_least_10_ug_m3": {
+          "original": 4.36,
+          "grouped": 4.36,
+          "difference_percent": 0.0
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 72,
+      "exact_seconds": 0.5304047088138759,
+      "grouped_seconds": 0.03121854178607464,
+      "speedup": 16.99005393808844,
+      "centre_deg": 225.0,
+      "spread_deg": 80.0,
+      "seed": 22001
+    },
+    {
+      "original_max_ug_m3": 20.106906328536763,
+      "grouped_max_ug_m3": 20.127170682522372,
+      "maximum_difference_percent": 0.10078305262133232,
+      "normalized_rmse_percent": 0.2601158092050832,
+      "normalized_mae_percent": 0.1723805200935138,
+      "pixel_correlation": 0.9998500027890824,
+      "peak_displacement_m": 100.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 82.58,
+          "grouped": 82.55,
+          "difference_percent": -0.03632840881569525
+        },
+        "at_least_10_ug_m3": {
+          "original": 4.48,
+          "grouped": 4.46,
+          "difference_percent": -0.4464285714285817
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 72,
+      "exact_seconds": 0.5143839996308088,
+      "grouped_seconds": 0.03096608305349946,
+      "speedup": 16.6112064849183,
+      "centre_deg": 225.0,
+      "spread_deg": 80.0,
+      "seed": 22002
+    },
+    {
+      "original_max_ug_m3": 17.29929006493106,
+      "grouped_max_ug_m3": 17.297540455392856,
+      "maximum_difference_percent": -0.010113764967452317,
+      "normalized_rmse_percent": 0.25561318850942777,
+      "normalized_mae_percent": 0.18947689268525478,
+      "pixel_correlation": 0.9998747569012233,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 86.67,
+          "grouped": 86.43,
+          "difference_percent": -0.2769124264451308
+        },
+        "at_least_10_ug_m3": {
+          "original": 3.95,
+          "grouped": 3.99,
+          "difference_percent": 1.0126582278481022
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 1200,
+      "groups": 72,
+      "exact_seconds": 0.5215328331105411,
+      "grouped_seconds": 0.030629083048552275,
+      "speedup": 17.027373372027604,
+      "centre_deg": 225.0,
+      "spread_deg": 80.0,
+      "seed": 22003
+    }
+  ],
+  "real_table_summary": {
+    "cases": 6,
+    "worst_absolute_maximum_difference_percent": 1.0114293226202564,
+    "worst_normalized_rmse_percent": 0.385448196622634,
+    "worst_normalized_mae_percent": 0.22708420092505296,
+    "minimum_pixel_correlation": 0.999135756730065,
+    "minimum_speedup": 1.2142519656760202,
+    "maximum_speedup": 12.732421327465605
+  },
+  "real_table_cases": [
+    {
+      "original_max_ug_m3": 464.62742713036226,
+      "grouped_max_ug_m3": 469.3268051692948,
+      "maximum_difference_percent": 1.0114293226202564,
+      "normalized_rmse_percent": 0.17751464873115835,
+      "normalized_mae_percent": 0.053958002736256436,
+      "pixel_correlation": 0.9997432229503371,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 58.08,
+          "grouped": 57.89,
+          "difference_percent": -0.32713498622589143
+        },
+        "at_least_10_ug_m3": {
+          "original": 41.28,
+          "grouped": 40.980000000000004,
+          "difference_percent": -0.7267441860465047
+        },
+        "at_least_100_ug_m3": {
+          "original": 3.38,
+          "grouped": 3.4,
+          "difference_percent": 0.5917159763313615
+        }
+      },
+      "observations": 24,
+      "groups": 16,
+      "exact_seconds": 0.010479959193617105,
+      "grouped_seconds": 0.00696220900863409,
+      "speedup": 1.5052635134366872,
+      "case": "dmc_6h"
+    },
+    {
+      "original_max_ug_m3": 163.56087497547236,
+      "grouped_max_ug_m3": 164.87257805182475,
+      "maximum_difference_percent": 0.801966287199866,
+      "normalized_rmse_percent": 0.385448196622634,
+      "normalized_mae_percent": 0.18760810217647872,
+      "pixel_correlation": 0.999135756730065,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 76.5,
+          "grouped": 76.06,
+          "difference_percent": -0.5751633986928075
+        },
+        "at_least_10_ug_m3": {
+          "original": 38.62,
+          "grouped": 38.730000000000004,
+          "difference_percent": 0.28482651475920906
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.32,
+          "grouped": 0.33,
+          "difference_percent": 3.1250000000000027
+        }
+      },
+      "observations": 96,
+      "groups": 55,
+      "exact_seconds": 0.04128204192966223,
+      "grouped_seconds": 0.02332499995827675,
+      "speedup": 1.7698624653164692,
+      "case": "dmc_day"
+    },
+    {
+      "original_max_ug_m3": 64.9336541700564,
+      "grouped_max_ug_m3": 65.49154356157757,
+      "maximum_difference_percent": 0.8591683290456773,
+      "normalized_rmse_percent": 0.34543392752524915,
+      "normalized_mae_percent": 0.22708420092505296,
+      "pixel_correlation": 0.9996543923113593,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 99.55,
+          "grouped": 99.55,
+          "difference_percent": 0.0
+        },
+        "at_least_10_ug_m3": {
+          "original": 34.660000000000004,
+          "grouped": 34.53,
+          "difference_percent": -0.37507212925563344
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 2954,
+      "groups": 234,
+      "exact_seconds": 1.26729820901528,
+      "grouped_seconds": 0.09953316627070308,
+      "speedup": 12.732421327465605,
+      "case": "dmc_month"
+    },
+    {
+      "original_max_ug_m3": 139.18060969303886,
+      "grouped_max_ug_m3": 139.1806096930389,
+      "maximum_difference_percent": 1.901829547957554e-14,
+      "normalized_rmse_percent": 1.366975309902792e-15,
+      "normalized_mae_percent": 2.563902726340669e-16,
+      "pixel_correlation": 0.9999999999999998,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 10.57,
+          "grouped": 10.57,
+          "difference_percent": 0.0
+        },
+        "at_least_10_ug_m3": {
+          "original": 5.78,
+          "grouped": 5.78,
+          "difference_percent": 0.0
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.14,
+          "grouped": 0.14,
+          "difference_percent": 0.0
+        }
+      },
+      "observations": 6,
+      "groups": 5,
+      "exact_seconds": 0.002629208844155073,
+      "grouped_seconds": 0.002165290992707014,
+      "speedup": 1.2142519656760202,
+      "case": "noaa_6h"
+    },
+    {
+      "original_max_ug_m3": 57.997950544423986,
+      "grouped_max_ug_m3": 57.997950544424036,
+      "maximum_difference_percent": 7.986853650542144e-14,
+      "normalized_rmse_percent": 2.500737453332004e-14,
+      "normalized_mae_percent": 5.314152048505993e-15,
+      "pixel_correlation": 1.0,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 18.72,
+          "grouped": 18.72,
+          "difference_percent": 0.0
+        },
+        "at_least_10_ug_m3": {
+          "original": 7.41,
+          "grouped": 7.41,
+          "difference_percent": 0.0
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 24,
+      "groups": 15,
+      "exact_seconds": 0.010131999850273132,
+      "grouped_seconds": 0.006271708756685257,
+      "speedup": 1.615508666513419,
+      "case": "noaa_day"
+    },
+    {
+      "original_max_ug_m3": 33.140110007103345,
+      "grouped_max_ug_m3": 33.1401100071034,
+      "maximum_difference_percent": 1.7971275318957113e-13,
+      "normalized_rmse_percent": 3.723955756935815e-14,
+      "normalized_mae_percent": 1.4629242836870927e-14,
+      "pixel_correlation": 0.9999999999999998,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 59.58,
+          "grouped": 59.58,
+          "difference_percent": 0.0
+        },
+        "at_least_10_ug_m3": {
+          "original": 6.93,
+          "grouped": 6.93,
+          "difference_percent": 0.0
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "observations": 723,
+      "groups": 119,
+      "exact_seconds": 0.310417584143579,
+      "grouped_seconds": 0.05016000010073185,
+      "speedup": 6.188548315793363,
+      "case": "noaa_month"
+    }
+  ]
+}

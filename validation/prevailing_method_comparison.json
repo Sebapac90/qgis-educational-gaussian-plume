@@ -1,0 +1,297 @@
+{
+  "status": "passed",
+  "purpose": "Compare the current prevailing method with direction-sector frequency aggregation",
+  "production_policy": "72-sector aggregation is the default; the row-wise method is retained for controlled validation with direction_sectors=None",
+  "wind_configuration": {
+    "wind_mode": "prevailing",
+    "wind_speed_m_s": 5.0,
+    "wind_from_deg": 225.0,
+    "wind_hours": 1200,
+    "wind_random_seed": 22001,
+    "wind_direction_std_deg": 40.0
+  },
+  "grouped_method": {
+    "direction_sectors_tested": [
+      16,
+      32,
+      48,
+      72,
+      90,
+      120,
+      180,
+      360
+    ],
+    "representative_direction": "weighted circular mean within each occupied sector",
+    "representative_speed": "weighted harmonic mean"
+  },
+  "grid": {
+    "width_m": 10000,
+    "height_m": 10000,
+    "resolution_m": 100.0,
+    "cells": 10000
+  },
+  "physics": {
+    "emission_kg_s": 0.04,
+    "effective_height_m": 50.0,
+    "stability": "D"
+  },
+  "comparisons_by_direction_sectors": {
+    "16": {
+      "original_max_ug_m3": 32.745058914938674,
+      "grouped_max_ug_m3": 72.84110237877712,
+      "maximum_difference_percent": 122.44914131318346,
+      "normalized_rmse_percent": 16.166235280763928,
+      "normalized_mae_percent": 8.132019341418971,
+      "pixel_correlation": 0.6962608485968779,
+      "peak_displacement_m": 100.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 45.71,
+          "grouped": 37.03,
+          "difference_percent": -18.98928024502297
+        },
+        "at_least_10_ug_m3": {
+          "original": 9.44,
+          "grouped": 11.5,
+          "difference_percent": 21.822033898305094
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "original_plumes": 1200,
+      "grouped_plumes": 13,
+      "original_seconds": 0.5197406252846122,
+      "grouped_seconds": 0.005628250073641539,
+      "speedup": 92.34497729919353
+    },
+    "32": {
+      "original_max_ug_m3": 32.745058914938674,
+      "grouped_max_ug_m3": 38.213844659822854,
+      "maximum_difference_percent": 16.70110216961391,
+      "normalized_rmse_percent": 3.450594592337514,
+      "normalized_mae_percent": 1.78526786223988,
+      "pixel_correlation": 0.9771103942054172,
+      "peak_displacement_m": 100.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 45.71,
+          "grouped": 45.63,
+          "difference_percent": -0.1750164077882264
+        },
+        "at_least_10_ug_m3": {
+          "original": 9.44,
+          "grouped": 9.700000000000001,
+          "difference_percent": 2.75423728813561
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "original_plumes": 1200,
+      "grouped_plumes": 24,
+      "original_seconds": 0.5197406252846122,
+      "grouped_seconds": 0.010498749557882547,
+      "speedup": 49.50500270714493
+    },
+    "48": {
+      "original_max_ug_m3": 32.745058914938674,
+      "grouped_max_ug_m3": 33.13162843244314,
+      "maximum_difference_percent": 1.180543050811563,
+      "normalized_rmse_percent": 0.424203447133384,
+      "normalized_mae_percent": 0.23909187174109975,
+      "pixel_correlation": 0.9996429162030943,
+      "peak_displacement_m": 223.60679774997897,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 45.71,
+          "grouped": 45.64,
+          "difference_percent": -0.153139356814702
+        },
+        "at_least_10_ug_m3": {
+          "original": 9.44,
+          "grouped": 9.43,
+          "difference_percent": -0.10593220338982826
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "original_plumes": 1200,
+      "grouped_plumes": 35,
+      "original_seconds": 0.5197406252846122,
+      "grouped_seconds": 0.015235207974910736,
+      "speedup": 34.1144424244499
+    },
+    "72": {
+      "original_max_ug_m3": 32.745058914938674,
+      "grouped_max_ug_m3": 33.061922456115916,
+      "maximum_difference_percent": 0.9676682579816114,
+      "normalized_rmse_percent": 0.16194919138126876,
+      "normalized_mae_percent": 0.08626868652785662,
+      "pixel_correlation": 0.9999479354572879,
+      "peak_displacement_m": 223.60679774997897,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 45.71,
+          "grouped": 45.71,
+          "difference_percent": 0.0
+        },
+        "at_least_10_ug_m3": {
+          "original": 9.44,
+          "grouped": 9.43,
+          "difference_percent": -0.10593220338982826
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "original_plumes": 1200,
+      "grouped_plumes": 52,
+      "original_seconds": 0.5197406252846122,
+      "grouped_seconds": 0.022186958231031895,
+      "speedup": 23.425501588481584
+    },
+    "90": {
+      "original_max_ug_m3": 32.745058914938674,
+      "grouped_max_ug_m3": 32.74420667985256,
+      "maximum_difference_percent": -0.002602637205002033,
+      "normalized_rmse_percent": 0.08699791055309221,
+      "normalized_mae_percent": 0.04833430068763033,
+      "pixel_correlation": 0.9999849867646927,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 45.71,
+          "grouped": 45.74,
+          "difference_percent": 0.0656311529205888
+        },
+        "at_least_10_ug_m3": {
+          "original": 9.44,
+          "grouped": 9.42,
+          "difference_percent": -0.2118644067796565
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "original_plumes": 1200,
+      "grouped_plumes": 63,
+      "original_seconds": 0.5197406252846122,
+      "grouped_seconds": 0.02682433370500803,
+      "speedup": 19.375714267511444
+    },
+    "120": {
+      "original_max_ug_m3": 32.745058914938674,
+      "grouped_max_ug_m3": 32.857142350972254,
+      "maximum_difference_percent": 0.3422911417711329,
+      "normalized_rmse_percent": 0.05628383178184961,
+      "normalized_mae_percent": 0.030948030469560982,
+      "pixel_correlation": 0.9999937011063854,
+      "peak_displacement_m": 0.0,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 45.71,
+          "grouped": 45.730000000000004,
+          "difference_percent": 0.043754101947064375
+        },
+        "at_least_10_ug_m3": {
+          "original": 9.44,
+          "grouped": 9.42,
+          "difference_percent": -0.2118644067796565
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "original_plumes": 1200,
+      "grouped_plumes": 81,
+      "original_seconds": 0.5197406252846122,
+      "grouped_seconds": 0.03435604181140661,
+      "speedup": 15.128070577445046
+    },
+    "180": {
+      "original_max_ug_m3": 32.745058914938674,
+      "grouped_max_ug_m3": 32.806608932806554,
+      "maximum_difference_percent": 0.18796734502070261,
+      "normalized_rmse_percent": 0.02346979253262068,
+      "normalized_mae_percent": 0.01295771310580916,
+      "pixel_correlation": 0.9999989051928809,
+      "peak_displacement_m": 223.60679774997897,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 45.71,
+          "grouped": 45.71,
+          "difference_percent": 0.0
+        },
+        "at_least_10_ug_m3": {
+          "original": 9.44,
+          "grouped": 9.43,
+          "difference_percent": -0.10593220338982826
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "original_plumes": 1200,
+      "grouped_plumes": 115,
+      "original_seconds": 0.5197406252846122,
+      "grouped_seconds": 0.04837887501344085,
+      "speedup": 10.743131690024114
+    },
+    "360": {
+      "original_max_ug_m3": 32.745058914938674,
+      "grouped_max_ug_m3": 32.750688742953066,
+      "maximum_difference_percent": 0.01719290849044737,
+      "normalized_rmse_percent": 0.005893905203892015,
+      "normalized_mae_percent": 0.0031853288640444335,
+      "pixel_correlation": 0.9999999309235545,
+      "peak_displacement_m": 223.60679774997897,
+      "areas_km2": {
+        "at_least_1_ug_m3": {
+          "original": 45.71,
+          "grouped": 45.7,
+          "difference_percent": -0.021877050973524416
+        },
+        "at_least_10_ug_m3": {
+          "original": 9.44,
+          "grouped": 9.44,
+          "difference_percent": 0.0
+        },
+        "at_least_100_ug_m3": {
+          "original": 0.0,
+          "grouped": 0.0,
+          "difference_percent": null
+        }
+      },
+      "original_plumes": 1200,
+      "grouped_plumes": 199,
+      "original_seconds": 0.5197406252846122,
+      "grouped_seconds": 0.08353629102930427,
+      "speedup": 6.221734516586197
+    }
+  },
+  "finding": {
+    "rose_display_sectors": 16,
+    "recommended_calculation_sectors": 72,
+    "reason": "16 sectors visibly distort the field; 72 sectors keep maximum and area differences near 1% in this controlled case"
+  },
+  "artifacts": {
+    "figure": "validation/prevailing_method_comparison.png",
+    "summary_csv": "validation/prevailing_method_comparison.csv"
+  }
+}
