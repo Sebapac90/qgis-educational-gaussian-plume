@@ -60,7 +60,12 @@ H = h
 Δh = 0
 ```
 
-El GeoTIFF registra `stack_height_m`, `plume_rise_m` y `effective_height_m`. Una extensión futura podrá calcular `H = h + Δh` con los datos térmicos y geométricos necesarios; no se simula ese cálculo de forma implícita.
+El GeoTIFF registra `stack_height_m`, `plume_rise_m` y `effective_height_m`. El
+siguiente hito incorporará modos sin ascenso, altura efectiva ingresada y
+ascenso final Briggs calculado. Las ecuaciones, ramas de flotación y momento,
+entradas y correcciones de dos errores impresos del ejemplo 7.14 están
+registradas en [plume-rise.md](plume-rise.md). Hasta completar ese hito, la
+versión ejecutable conserva `Δh = 0`.
 
 La rapidez observada se corrige desde la altura de medición `z_ref` hasta la altura de la chimenea mediante la ecuación 7.46:
 
