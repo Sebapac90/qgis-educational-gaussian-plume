@@ -1,9 +1,9 @@
 [general]
 name=Pluma Gaussiana Educativa
 description=Educational Gaussian plume simulations with georeferenced outputs and wind observations.
-about=Educational, non-regulatory steady-state Gaussian plume plugin based on Masters and Ela (2008).
-    Students can select stability A-F, adjust wind speed from its measurement height, use constant, synthetic or CSV wind data, and create georeferenced raster, isoline, source and wind-rose outputs.
-    Unlike AirEmergency, this plugin focuses on teaching the classical flat-terrain model and does not simulate terrain, dry deposition, fire releases or plume rise.
+about=Educational, non-regulatory QGIS plugin implementing the classical steady-state Gaussian plume model over flat terrain.
+    Students can select stability A-F, adjust wind speed from its measurement height, use constant, synthetic or CSV wind data, calculate final Briggs plume rise, and create georeferenced raster, isoline, source and wind-rose outputs.
+    It does not model terrain effects, gradual plume rise, deposition, building downwash or atmospheric chemistry.
     The interface is available in Spanish and English. It uses NumPy, PyProj and Matplotlib from the QGIS Python environment.
 version=0.14.0
 qgisMinimumVersion=3.40

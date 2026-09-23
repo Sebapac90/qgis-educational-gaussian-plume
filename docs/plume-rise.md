@@ -1,11 +1,12 @@
 # Elevación de pluma: formulación Briggs verificada
 
-Estado: núcleo de cálculo implementado y verificado; integración con los modos
-de viento, las salidas espaciales y la interfaz QGIS todavía pendiente.
+Estado: núcleo, modos de viento, metadatos espaciales e interfaz QGIS
+implementados. Pendiente de prueba manual de usabilidad antes de preparar una
+nueva versión pública.
 
 ## Alcance adoptado
 
-El complemento incorporará Briggs como método calculado de elevación de pluma.
+El complemento incorpora Briggs como método calculado de elevación de pluma.
 Masters y Ela (2008), ecuaciones 7.51–7.54, se conserva como introducción
 pedagógica. Para que el modo calculado no quede limitado a penachos calientes
 dominados por flotación, las ramas de momento y el criterio de cruce se toman de

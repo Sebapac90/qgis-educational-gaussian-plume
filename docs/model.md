@@ -53,21 +53,31 @@ Para D, E y F, el término `c X^d + f` se vuelve no positivo muy cerca de la fue
 
 ## Altura de chimenea y viento
 
-El modo básico pide la altura física de la chimenea `h`, fija el ascenso de pluma en cero y usa:
+El complemento ofrece tres tratamientos de altura:
+
+1. **Sin elevación**: la altura ingresada es la altura física de la chimenea y
+   se usa `H = h`, `Δh = 0`.
+2. **Altura efectiva manual**: el usuario ingresa directamente `H`.
+3. **Briggs calculado**: el usuario ingresa la geometría y condiciones de
+   salida; cada clase de viento calcula su propio `Δh` y `H`.
+
+El modo sin elevación conserva el comportamiento de los escenarios anteriores:
 
 ```text
 H = h
 Δh = 0
 ```
 
-El GeoTIFF registra `stack_height_m`, `plume_rise_m` y `effective_height_m`. El
-siguiente hito incorporará modos sin ascenso, altura efectiva ingresada y
-ascenso final Briggs calculado. Las ecuaciones, ramas de flotación y momento,
-entradas y correcciones de dos errores impresos del ejemplo 7.14 están
-registradas en [plume-rise.md](plume-rise.md). Hasta completar ese hito, la
-versión ejecutable conserva `Δh = 0`.
+El GeoTIFF registra el modo, `stack_height_m`, los mínimos, máximos y medias de
+`plume_rise_m` y `effective_height_m`, además de las entradas de Briggs. Las
+ecuaciones, ramas de flotación y momento, y las correcciones de dos errores
+impresos del ejemplo 7.14 están registradas en
+[plume-rise.md](plume-rise.md).
 
-La rapidez observada se corrige desde la altura de medición `z_ref` hasta la altura de la chimenea mediante la ecuación 7.46:
+La rapidez observada se corrige mediante la ecuación 7.46. En los modos sin
+elevación y manual se corrige directamente hasta `H`. Con Briggs se corrige
+primero hasta la altura física para calcular `Δh` y luego desde la altura de
+medición hasta el `H` resultante para calcular la concentración:
 
 ```text
 u(H) = u(z_ref) · (H/z_ref)^p
@@ -113,7 +123,7 @@ Las calmas y direcciones variables se muestran separadas en la rosa. El campo de
 - una fuente puntual continua;
 - estabilidad A–F fija por escenario;
 - reflexión perfecta en el suelo;
-- sin ascenso de pluma, deposición, química, edificios ni terreno;
+- sin elevación gradual de pluma, deposición, química, edificios ni terreno;
 - sin autocorrelación temporal ni ráfagas;
 - dominio local máximo de 100 km por lado;
 - resultados educativos, sin validez regulatoria declarada.

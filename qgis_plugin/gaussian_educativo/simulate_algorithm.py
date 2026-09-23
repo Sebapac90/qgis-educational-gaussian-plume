@@ -27,7 +27,9 @@ from .gaussian_core import (MASTERS_2008_FIGURE_START_M,
 from .gaussian_spatial import (locate_source_coordinates, make_grid,
                                make_grid_bounds)
 from .gaussian_units import concentration_factor_from_kg_m3, emission_to_kg_s
-from .gaussian_wind import (aggregate_wind_for_calculation,
+from .gaussian_wind import (BRIGGS_CALCULATION_SPEED_CLASS_EDGES_M_S,
+                            BriggsStackParameters,
+                            aggregate_wind_for_calculation,
                             mean_ground_concentration, save_wind_rose,
                             wind_from_config)
 from .styles import register_postprocessor
@@ -44,6 +46,13 @@ class SimulateGaussianPlumeAlgorithm(QgsProcessingAlgorithm):
     WIND_FILE = "WIND_FILE"
     WIND_ROSE = "WIND_ROSE"
     EFFECTIVE_HEIGHT = "EFFECTIVE_HEIGHT"
+    HEIGHT_MODE = "HEIGHT_MODE"
+    STACK_DIAMETER = "STACK_DIAMETER"
+    EXIT_VELOCITY = "EXIT_VELOCITY"
+    STACK_TEMPERATURE_C = "STACK_TEMPERATURE_C"
+    AMBIENT_TEMPERATURE_C = "AMBIENT_TEMPERATURE_C"
+    AMBIENT_GRADIENT_C_KM = "AMBIENT_GRADIENT_C_KM"
+    STACK_TIP_DOWNWASH = "STACK_TIP_DOWNWASH"
     STABILITY = "STABILITY"
     WIND_REFERENCE_HEIGHT = "WIND_REFERENCE_HEIGHT"
     WIND_EXPOSURE = "WIND_EXPOSURE"
@@ -96,7 +105,7 @@ class SimulateGaussianPlumeAlgorithm(QgsProcessingAlgorithm):
         return SimulateGaussianPlumeAlgorithm()
 
     def shortHelpString(self):
-        return (tr('Modelo docente estacionario sobre terreno plano basado en Masters y Ela (2008). La dirección es meteorológica DESDE, horaria desde norte verdadero. Predominante y aleatorio uniforme usan 1200 intervalos reproducibles (semilla 22001); predominante usa desviación 40° y aleatorio ignora la dirección ingresada. La tabla de observaciones requiere timestamp_utc (ISO 8601 UTC), direction_from_deg (grados) y wind_speed_m_s (m/s, mayor que cero). Cada fila representa un intervalo de igual duración. La rosa usa 16 sectores; el cálculo agrupa las observaciones en 72 sectores direccionales y siete clases de velocidad antes de promediar las plumas. Las calmas deben excluirse y documentarse por separado. La rapidez se corrige desde la altura de medición hasta la chimenea y la dispersión usa las ecuaciones de Martin. La altura ingresada es la altura física de la chimenea; se supone ascenso de pluma cero y la altura efectiva es igual a ella. No representa terreno, deposición, química, edificios ni ascenso de pluma.'))
+        return tr('Modelo docente estacionario sobre terreno plano. Permite usar altura sin elevación, altura efectiva manual o elevación final de Briggs. En Briggs, cada clase de viento calcula su propia altura efectiva. No representa terreno, deposición, química, edificios ni elevación gradual de la pluma.')
 
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterPoint(
@@ -131,9 +140,40 @@ class SimulateGaussianPlumeAlgorithm(QgsProcessingAlgorithm):
             fileFilter="PNG (*.png)", optional=True,
             createByDefault=False))
         self.addParameter(QgsProcessingParameterNumber(
-            self.EFFECTIVE_HEIGHT, tr('Altura de la chimenea (m)'),
+            self.EFFECTIVE_HEIGHT,
+            tr('Altura física de chimenea o efectiva manual (m)'),
             QgsProcessingParameterNumber.Double, defaultValue=50.0,
             minValue=0.0))
+        self.addParameter(QgsProcessingParameterEnum(
+            self.HEIGHT_MODE, tr('Tratamiento de la altura'),
+            (tr('Sin elevación: altura efectiva = chimenea'),
+             tr('Altura efectiva ingresada manualmente'),
+             tr('Elevación final calculada con Briggs')),
+            defaultValue=0))
+        self.addParameter(QgsProcessingParameterNumber(
+            self.STACK_DIAMETER, tr('Diámetro interior de la chimenea (m)'),
+            QgsProcessingParameterNumber.Double, defaultValue=2.0,
+            minValue=1e-9))
+        self.addParameter(QgsProcessingParameterNumber(
+            self.EXIT_VELOCITY, tr('Velocidad de salida del gas (m/s)'),
+            QgsProcessingParameterNumber.Double, defaultValue=10.0,
+            minValue=1e-9))
+        self.addParameter(QgsProcessingParameterNumber(
+            self.STACK_TEMPERATURE_C, tr('Temperatura del gas (°C)'),
+            QgsProcessingParameterNumber.Double, defaultValue=126.85,
+            minValue=-273.14))
+        self.addParameter(QgsProcessingParameterNumber(
+            self.AMBIENT_TEMPERATURE_C, tr('Temperatura ambiente (°C)'),
+            QgsProcessingParameterNumber.Double, defaultValue=26.85,
+            minValue=-273.14))
+        self.addParameter(QgsProcessingParameterNumber(
+            self.AMBIENT_GRADIENT_C_KM,
+            tr('Gradiente vertical ambiente para E–F (°C/km)'),
+            QgsProcessingParameterNumber.Double, defaultValue=2.0,
+            minValue=-9.999999))
+        self.addParameter(QgsProcessingParameterEnum(
+            self.STACK_TIP_DOWNWASH, tr('Descenso en la boca de la chimenea'),
+            (tr('Desactivado'), tr('Activado')), defaultValue=0))
         self.addParameter(QgsProcessingParameterEnum(
             self.STABILITY, tr('Estabilidad Pasquill–Gifford'),
             self.STABILITY_CLASSES, defaultValue=3))
@@ -278,7 +318,34 @@ class SimulateGaussianPlumeAlgorithm(QgsProcessingAlgorithm):
                     raise ValueError(tr('Seleccione un CSV para el modo tabla'))
                 wind_model = {"wind_mode": "table", "wind_file": wind_file}
             wind = wind_from_config(wind_model)
-            calculation_wind = aggregate_wind_for_calculation(wind)
+            height_mode = self.parameterAsEnum(
+                parameters, self.HEIGHT_MODE, context)
+            input_height = self.parameterAsDouble(
+                parameters, self.EFFECTIVE_HEIGHT, context)
+            if input_height <= 0:
+                raise ValueError(tr('La altura debe ser mayor que cero'))
+            briggs_stack = None
+            if height_mode == 2:
+                briggs_stack = BriggsStackParameters(
+                    stack_height_m=input_height,
+                    stack_diameter_m=self.parameterAsDouble(
+                        parameters, self.STACK_DIAMETER, context),
+                    exit_velocity_m_s=self.parameterAsDouble(
+                        parameters, self.EXIT_VELOCITY, context),
+                    stack_temperature_k=self.parameterAsDouble(
+                        parameters, self.STACK_TEMPERATURE_C, context) + 273.15,
+                    ambient_temperature_k=self.parameterAsDouble(
+                        parameters, self.AMBIENT_TEMPERATURE_C, context) + 273.15,
+                    ambient_temperature_gradient_k_m=(
+                        self.parameterAsDouble(
+                            parameters, self.AMBIENT_GRADIENT_C_KM, context) /
+                        1000.0),
+                    stack_tip_downwash=bool(self.parameterAsEnum(
+                        parameters, self.STACK_TIP_DOWNWASH, context)))
+            calculation_wind = aggregate_wind_for_calculation(
+                wind, **({"speed_class_edges_m_s":
+                          BRIGGS_CALCULATION_SPEED_CLASS_EDGES_M_S}
+                         if briggs_stack is not None else {}))
             evaluations = int(np.prod(grid.shape)) * calculation_wind.samples
             if evaluations > 50_000_000:
                 recommended = 10 * math.ceil(
@@ -287,14 +354,12 @@ class SimulateGaussianPlumeAlgorithm(QgsProcessingAlgorithm):
                     tr('La combinación de grilla y viento requiere {:,} evaluaciones, sobre el límite interactivo de {:,}. Aumente la resolución al menos a {:.0f} m o reduzca el dominio.')
                     .format(evaluations, 50_000_000,
                             recommended))
-            effective_height = self.parameterAsDouble(
-                parameters, self.EFFECTIVE_HEIGHT, context)
-            if effective_height <= 0:
-                raise ValueError(
-                    tr('El modo Masters requiere una altura de chimenea mayor que cero'))
-            concentration = mean_ground_concentration(
+            concentration, height_summary = mean_ground_concentration(
                 grid, calculation_wind, emission_kg_s=emission_kg_s,
-                effective_height_m=effective_height, stability=stability,
+                effective_height_m=(input_height if briggs_stack is None
+                                    else None),
+                stability=stability, briggs_stack=briggs_stack,
+                return_height_summary=True,
                 max_evaluations=50_000_000,
                 progress_callback=lambda fraction:
                     feedback.setProgress(5 + round(60 * fraction)),
@@ -311,7 +376,9 @@ class SimulateGaussianPlumeAlgorithm(QgsProcessingAlgorithm):
                     self._extend_domain(
                         grid, concentration, feedback, wind=calculation_wind,
                         emission_kg_s=emission_kg_s,
-                        effective_height_m=effective_height,
+                        effective_height_m=(input_height
+                                            if briggs_stack is None else None),
+                        briggs_stack=briggs_stack,
                         stability=stability,
                         wind_reference_height_m=wind_reference_height,
                         wind_exposure=wind_exposure)
@@ -346,7 +413,8 @@ class SimulateGaussianPlumeAlgorithm(QgsProcessingAlgorithm):
         self._write_geotiff(output_path, grid, displayed, self._source_epsg,
                             concentration_unit, emission, self.EMISSION_TOKENS[emission_index],
                             wind, calculation_wind.samples,
-                            effective_height, stability,
+                            height_summary, height_mode, input_height,
+                            briggs_stack, stability,
                             wind_reference_height,
                             wind_exposure,
                             domain_policy=("fixed" if domain_policy == 0 else
@@ -378,6 +446,10 @@ class SimulateGaussianPlumeAlgorithm(QgsProcessingAlgorithm):
         feedback.pushInfo(
             tr('Viento: {} registro(s), {} clase(s) de cálculo, rapidez media {:.6g} m/s').format(
                 wind.samples, calculation_wind.samples, wind.mean_speed_m_s))
+        feedback.pushInfo(
+            tr('Altura: modo {}; elevación media {:.6g} m; altura efectiva media {:.6g} m').format(
+                height_summary.mode, height_summary.plume_rise_mean_m,
+                height_summary.effective_height_mean_m))
         feedback.pushInfo(tr('Isolíneas: {}').format(
             ", ".join("{:g}".format(level) for level in levels) or "ninguna"))
         feedback.pushInfo(
@@ -576,7 +648,8 @@ class SimulateGaussianPlumeAlgorithm(QgsProcessingAlgorithm):
     @staticmethod
     def _write_geotiff(path, grid, values, epsg, unit, emission,
                        emission_unit, wind, calculation_wind_samples,
-                       effective_height, stability,
+                       height_summary, height_mode, input_height,
+                       briggs_stack, stability,
                        wind_reference_height, wind_exposure, domain_policy,
                        domain_status, domain_iterations, edge_maxima):
         driver = gdal.GetDriverByName("GTiff")
@@ -591,9 +664,19 @@ class SimulateGaussianPlumeAlgorithm(QgsProcessingAlgorithm):
         spatial_reference = osr.SpatialReference()
         spatial_reference.ImportFromEPSG(int(epsg))
         dataset.SetProjection(spatial_reference.ExportToWkt())
-        wind_factor = float(masters_2008_wind_speed_at_height(
+        effective_height = height_summary.effective_height_mean_m
+        fixed_height = height_summary.mode == "fixed"
+        wind_factor = (float(masters_2008_wind_speed_at_height(
             1.0, wind_reference_height, effective_height, stability,
-            wind_exposure))
+            wind_exposure)) if fixed_height else None)
+        height_mode_token = ("no_rise", "manual_effective", "briggs")[
+            height_mode]
+        stack_height = ("" if height_mode == 1 else str(input_height))
+        height_assumption = {
+            0: "effective height equals physical stack height; plume rise zero",
+            1: "effective height supplied manually; physical stack height unknown",
+            2: "final plume rise calculated per wind class with Briggs ISC3",
+        }[height_mode]
         minimum_x = masters_2008_minimum_positive_x_m(stability)
         dataset.SetMetadata({"emission_value": str(emission),
                              "emission_unit": emission_unit,
@@ -615,19 +698,48 @@ class SimulateGaussianPlumeAlgorithm(QgsProcessingAlgorithm):
                              "wind_mean_speed_m_s": str(wind.mean_speed_m_s),
                              "wind_reference_height_m": str(wind_reference_height),
                              "wind_exposure": wind_exposure,
-                             "wind_height_factor": str(wind_factor),
+                             "wind_height_factor": ("" if wind_factor is None
+                                                    else str(wind_factor)),
                              "wind_model_mean_speed_m_s":
-                                 str(wind.mean_speed_m_s * wind_factor),
+                                 ("" if wind_factor is None else
+                                  str(wind.mean_speed_m_s * wind_factor)),
                              "wind_representative_from_deg":
                                  ("" if wind.representative_from_deg is None else
                                   str(wind.representative_from_deg)),
                              "wind_source_file": wind.source_file or "",
                              "height_m": str(effective_height),
-                             "stack_height_m": str(effective_height),
-                             "plume_rise_m": "0",
+                             "height_mode": height_mode_token,
+                             "stack_height_m": stack_height,
+                             "plume_rise_m":
+                                 str(height_summary.plume_rise_mean_m),
+                             "plume_rise_min_m":
+                                 str(height_summary.plume_rise_min_m),
+                             "plume_rise_max_m":
+                                 str(height_summary.plume_rise_max_m),
                              "effective_height_m": str(effective_height),
-                             "height_assumption":
-                                 "effective height equals stack height; plume rise not calculated",
+                             "effective_height_min_m":
+                                 str(height_summary.effective_height_min_m),
+                             "effective_height_max_m":
+                                 str(height_summary.effective_height_max_m),
+                             "height_assumption": height_assumption,
+                             "briggs_stack_diameter_m":
+                                 ("" if briggs_stack is None else
+                                  str(briggs_stack.stack_diameter_m)),
+                             "briggs_exit_velocity_m_s":
+                                 ("" if briggs_stack is None else
+                                  str(briggs_stack.exit_velocity_m_s)),
+                             "briggs_stack_temperature_k":
+                                 ("" if briggs_stack is None else
+                                  str(briggs_stack.stack_temperature_k)),
+                             "briggs_ambient_temperature_k":
+                                 ("" if briggs_stack is None else
+                                  str(briggs_stack.ambient_temperature_k)),
+                             "briggs_ambient_gradient_k_m":
+                                 ("" if briggs_stack is None else
+                                  str(briggs_stack.ambient_temperature_gradient_k_m)),
+                             "briggs_stack_tip_downwash":
+                                 ("" if briggs_stack is None else
+                                  str(briggs_stack.stack_tip_downwash).lower()),
                              "stability": stability,
                              "dispersion_model": "masters_2008_martin_1976",
                              "near_source_nodata_radius_m":

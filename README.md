@@ -2,7 +2,7 @@
 
 Complemento experimental y bilingüe para enseñar la dispersión atmosférica con una pluma gaussiana estacionaria sobre terreno plano. La implementación física sigue a Masters y Ela (2008), capítulo 7, y utiliza las ecuaciones de dispersión de Martin (1976).
 
-El complemento es una herramienta docente. **No es un modelo regulatorio** y no representa terreno, edificios, deposición, química atmosférica, variación vertical de la dirección del viento ni ascenso de pluma.
+El complemento es una herramienta docente. **No es un modelo regulatorio** y no representa terreno, edificios, deposición, química atmosférica, variación vertical de la dirección del viento ni elevación gradual de la pluma.
 
 ## Descarga e instalación
 
@@ -57,7 +57,7 @@ La política predeterminada conserva el dominio solicitado y advierte si la plum
 
 ## Modelo y unidades
 
-El modelo usa reflexión perfecta en el suelo y altura efectiva igual a la altura física de la chimenea, por lo que supone ascenso de pluma nulo. Las unidades internas son kg/s, m/s, m y kg/m³; las conversiones de entrada y salida son explícitas.
+El modelo usa reflexión perfecta en el suelo. La altura puede tratarse sin elevación, ingresarse como altura efectiva manual o calcularse como elevación final con Briggs. Las unidades internas son kg/s, m/s, m y kg/m³; las conversiones de entrada y salida son explícitas.
 
 La formulación, los supuestos y las decisiones están documentados en [docs/model.md](docs/model.md). La política espacial se describe en [docs/spatial.md](docs/spatial.md).
 

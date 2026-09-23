@@ -13,7 +13,7 @@ Este documento registra la fuente teórica elegida para el complemento. La formu
 
 ## Decisiones docentes
 
-La aplicación no determina automáticamente la estabilidad. Tampoco calcula todavía el ascenso de pluma: hacerlo exige velocidad y diámetro de salida, temperaturas, condiciones ambientales y expresiones distintas según la estabilidad. El panel conserva estos límites visibles para que el estudiante sepa qué hipótesis está utilizando.
+La aplicación no determina automáticamente la estabilidad. El estudiante sigue ingresando la clase A–F. La elevación final de pluma es opcional y usa Briggs con velocidad y diámetro de salida, temperaturas y, para E–F, el gradiente vertical ambiente. El modo básico conserva elevación cero y la altura efectiva también puede ingresarse manualmente.
 
 Las ecuaciones de sigma se aplican directamente donde producen valores positivos. La tabla impresa y la figura sirven para contrastar y visualizar; sus primeros valores no se transforman en cortes artificiales. El campo cercano no representable se escribe como NoData hasta la raíz matemática de `σz`.
 

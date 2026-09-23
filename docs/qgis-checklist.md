@@ -163,6 +163,16 @@ un caso con ausentes.
   dentro del radio matemático de 16,586 m para D. Entre 20 y 100 m deben
   aplicarse directamente las ecuaciones 7.47–7.48, sin interpolación ni
   recorte.
+- [ ] **Elevación final Briggs:** seleccionar «Briggs calculado» y comprobar
+  que se habiliten diámetro, velocidad de salida, temperaturas, gradiente y
+  descenso en la boca. Usar chimenea 50 m, diámetro 2 m, salida 10 m/s, gas
+  126,85 °C, ambiente 26,85 °C, clase D, viento 5 m/s medido a 10 m y
+  exposición rugosa. La ejecución automática en QGIS 3.44 LTR obtuvo elevación
+  31,556068 m y altura efectiva 81,556068 m. Confirmar en el GeoTIFF
+  `height_mode=briggs`, `stack_height_m=50.0`, `plume_rise_m=31.556068...` y
+  `effective_height_m=81.556068...`. Guardar, cerrar y abrir el escenario; debe
+  recuperar los parámetros. Abrir además un escenario 0.14.0 y confirmar que
+  migre a «Sin elevación» con el mismo resultado anterior.
 - [x] **Simbología del TIFF:** pseudocolor monobanda con clases discretas
   YlOrRd y cortes coincidentes con las isolíneas del informe. Para el escenario
   de referencia: 0.1, 1, 2, 5, 10, 20, 50, 100, 200 y 221.557028 µg/m³;

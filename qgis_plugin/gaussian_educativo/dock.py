@@ -266,19 +266,48 @@ class GaussianDock(QgsDockWidget):
         emission_row.addWidget(self.emission_spin)
         emission_row.addWidget(self.emission_unit_combo)
         self.height_spin = self._spin(50.0, 0.0, 100000.0, 2, " m")
+        self.height_mode_combo = self._combo([
+            tr('Sin elevación'), tr('Altura efectiva manual'),
+            tr('Briggs calculado')], 0)
+        self.stack_diameter_spin = self._spin(2.0, 1e-6, 10000.0, 3, " m")
+        self.exit_velocity_spin = self._spin(10.0, 1e-6, 10000.0, 3, " m/s")
+        self.stack_temperature_spin = self._spin(
+            126.85, -273.14, 5000.0, 2, " °C")
+        self.ambient_temperature_spin = self._spin(
+            26.85, -273.14, 1000.0, 2, " °C")
+        self.ambient_gradient_spin = self._spin(
+            2.0, -9.999999, 1000.0, 3, " °C/km")
+        self.stack_tip_downwash_combo = self._combo([
+            tr('Desactivado'), tr('Activado')], 0)
+        self.height_mode_combo.currentIndexChanged.connect(
+            self._sync_height_controls)
         self.stability_combo = self._combo(list("ABCDEF"), 3)
         self.wind_reference_height_spin = self._spin(
             10.0, 0.01, 100000.0, 2, " m")
         self.wind_exposure_combo = self._combo([
             tr('Rugosa'), tr('Plana')], 0)
         model_form.addRow(tr('Emisión:'), emission_row)
-        model_form.addRow(tr('Altura de la chimenea:'), self.height_spin)
+        model_form.addRow(tr('Tratamiento de la altura:'),
+                          self.height_mode_combo)
+        self.height_label = QLabel()
+        model_form.addRow(self.height_label, self.height_spin)
+        model_form.addRow(tr('Diámetro interior:'), self.stack_diameter_spin)
+        model_form.addRow(tr('Velocidad de salida:'), self.exit_velocity_spin)
+        model_form.addRow(tr('Temperatura del gas:'),
+                          self.stack_temperature_spin)
+        model_form.addRow(tr('Temperatura ambiente:'),
+                          self.ambient_temperature_spin)
+        model_form.addRow(tr('Gradiente para E–F:'),
+                          self.ambient_gradient_spin)
+        model_form.addRow(tr('Descenso en la boca:'),
+                          self.stack_tip_downwash_combo)
         model_form.addRow(tr('Estabilidad:'), self.stability_combo)
         model_form.addRow(
             tr('Altura de medición del viento:'),
             self.wind_reference_height_spin)
         model_form.addRow(tr('Exposición:'), self.wind_exposure_combo)
         layout.addWidget(self._group(tr('Emisión y atmósfera'), model_form))
+        self._sync_height_controls()
 
         wind_form = QFormLayout()
         self.wind_mode_combo = self._combo([
@@ -489,6 +518,18 @@ class GaussianDock(QgsDockWidget):
             self.domain_policy_combo.setCurrentIndex(0)
         self.domain_policy_combo.setEnabled(not table_mode)
 
+    def _sync_height_controls(self):
+        mode = self.height_mode_combo.currentIndex()
+        briggs = mode == 2
+        self.height_label.setText(
+            tr('Altura efectiva:') if mode == 1 else
+            tr('Altura de la chimenea:'))
+        for widget in (
+                self.stack_diameter_spin, self.exit_velocity_spin,
+                self.stack_temperature_spin, self.ambient_temperature_spin,
+                self.ambient_gradient_spin, self.stack_tip_downwash_combo):
+            widget.setEnabled(briggs)
+
     def algorithm_parameters(self):
         """Return safe prefilled parameters for the standard Processing dialog."""
         if self.wgs84_point is None:
@@ -502,6 +543,14 @@ class GaussianDock(QgsDockWidget):
             "WIND_SPEED": self.wind_speed_spin.value(),
             "WIND_FROM": self.wind_from_spin.value(),
             "EFFECTIVE_HEIGHT": self.height_spin.value(),
+            "HEIGHT_MODE": self.height_mode_combo.currentIndex(),
+            "STACK_DIAMETER": self.stack_diameter_spin.value(),
+            "EXIT_VELOCITY": self.exit_velocity_spin.value(),
+            "STACK_TEMPERATURE_C": self.stack_temperature_spin.value(),
+            "AMBIENT_TEMPERATURE_C": self.ambient_temperature_spin.value(),
+            "AMBIENT_GRADIENT_C_KM": self.ambient_gradient_spin.value(),
+            "STACK_TIP_DOWNWASH":
+                self.stack_tip_downwash_combo.currentIndex(),
             "STABILITY": self.stability_combo.currentIndex(),
             "WIND_REFERENCE_HEIGHT":
                 self.wind_reference_height_spin.value(),
@@ -540,6 +589,13 @@ class GaussianDock(QgsDockWidget):
             "WIND_SPEED": self.wind_speed_spin,
             "WIND_FROM": self.wind_from_spin,
             "EFFECTIVE_HEIGHT": self.height_spin,
+            "HEIGHT_MODE": self.height_mode_combo,
+            "STACK_DIAMETER": self.stack_diameter_spin,
+            "EXIT_VELOCITY": self.exit_velocity_spin,
+            "STACK_TEMPERATURE_C": self.stack_temperature_spin,
+            "AMBIENT_TEMPERATURE_C": self.ambient_temperature_spin,
+            "AMBIENT_GRADIENT_C_KM": self.ambient_gradient_spin,
+            "STACK_TIP_DOWNWASH": self.stack_tip_downwash_combo,
             "STABILITY": self.stability_combo,
             "WIND_REFERENCE_HEIGHT": self.wind_reference_height_spin,
             "WIND_EXPOSURE": self.wind_exposure_combo,
@@ -567,7 +623,7 @@ class GaussianDock(QgsDockWidget):
             wind_hash = hashlib.sha256(copied.read_bytes()).hexdigest()
             parameters["WIND_FILE"] = copied.name
         document = {
-            "schema_version": 2,
+            "schema_version": 3,
             "plugin_version": "0.14.0",
             "algorithm": self.ALGORITHM_ID,
             "name": self.scenario_edit.text().strip(),
@@ -593,7 +649,7 @@ class GaussianDock(QgsDockWidget):
             raise ValueError(tr('Espere a que termine el cálculo antes de abrir un escenario'))
         path = Path(filename)
         document = json.loads(path.read_text(encoding="utf-8"))
-        if (document.get("schema_version") not in (1, 2) or
+        if (document.get("schema_version") not in (1, 2, 3) or
                 document.get("algorithm") != self.ALGORITHM_ID):
             raise ValueError(tr('Formato de escenario incompatible'))
         self._safe_name(document["name"])
@@ -602,6 +658,13 @@ class GaussianDock(QgsDockWidget):
         # the Masters 2008 / Martin 1976 formulation.
         parameters.setdefault("WIND_REFERENCE_HEIGHT", 10.0)
         parameters.setdefault("WIND_EXPOSURE", 0)
+        parameters.setdefault("HEIGHT_MODE", 0)
+        parameters.setdefault("STACK_DIAMETER", 2.0)
+        parameters.setdefault("EXIT_VELOCITY", 10.0)
+        parameters.setdefault("STACK_TEMPERATURE_C", 126.85)
+        parameters.setdefault("AMBIENT_TEMPERATURE_C", 26.85)
+        parameters.setdefault("AMBIENT_GRADIENT_C_KM", 2.0)
+        parameters.setdefault("STACK_TIP_DOWNWASH", 0)
         for key, widget in self._parameter_widgets().items():
             value = parameters[key]
             if isinstance(widget, QComboBox):
@@ -647,6 +710,7 @@ class GaussianDock(QgsDockWidget):
         self.wind_original_path = wind_import.get("source_file")
         self.wind_import_summary = wind_import.get("summary")
         self._sync_wind_controls()
+        self._sync_height_controls()
         self.scenario_edit.setText(document["name"])
         self.output_dir_edit.setText(document.get("output_base") or str(path.parent))
         self.status_label.setText(tr('Escenario recuperado. Revisa los parámetros y ejecuta.'))
