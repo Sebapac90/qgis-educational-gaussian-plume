@@ -1,6 +1,7 @@
 # Elevación de pluma: formulación Briggs verificada
 
-Estado: decisión física para el siguiente hito; todavía no implementada.
+Estado: núcleo de cálculo implementado y verificado; integración con los modos
+de viento, las salidas espaciales y la interfaz QGIS todavía pendiente.
 
 ## Alcance adoptado
 
@@ -10,9 +11,9 @@ pedagógica. Para que el modo calculado no quede limitado a penachos calientes
 dominados por flotación, las ramas de momento y el criterio de cruce se toman de
 la formulación Briggs documentada por EPA para ISC3.
 
-La primera implementación usará elevación **final**. La elevación gradual con la
-distancia y la estela de edificios quedan como extensiones separadas porque
-requieren cambiar la altura utilizada en cada receptor.
+La implementación actual calcula la elevación **final**. La elevación gradual
+con la distancia y la estela de edificios quedan como extensiones separadas
+porque requieren cambiar la altura utilizada en cada receptor.
 
 ## Variables y unidades
 
@@ -167,4 +168,3 @@ viento registrará también mínimos, máximos y medias ponderadas de `Δh` y `H
 - U.S. EPA (1995/2000). *User's Guide for the Industrial Source Complex (ISC3)
   Dispersion Models*, volumen II, sección 1.1.4, ecuaciones 1-7 a 1-22:
   https://gaftp.epa.gov/AIR/aqmg/SCRAM/models/other/isc3/isc3v2.pdf
-

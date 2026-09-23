@@ -9,6 +9,9 @@ Dispersion follows Masters and Ela (2008), equations 7.47-7.48 and Table 7.8,
 which reproduce the rural coefficients published by Martin (1976).
 """
 
+from dataclasses import dataclass
+from typing import Optional
+
 import numpy as np
 
 
@@ -33,6 +36,24 @@ _MASTERS_WIND_EXPONENT_ROUGH = {
     "D": .25, "E": .40, "F": .60,
 }
 MASTERS_2008_FIGURE_START_M = 100.0
+BRIGGS_GRAVITY_M_S2 = 9.8
+
+
+@dataclass(frozen=True)
+class BriggsPlumeRise:
+    """Final Briggs plume-rise calculation in SI units."""
+
+    method: str
+    regime: str
+    buoyancy_flux_m4_s3: float
+    momentum_flux_m4_s2: float
+    stability_parameter_s2: Optional[float]
+    crossover_temperature_k: Optional[float]
+    distance_to_final_rise_m: Optional[float]
+    stack_tip_downwash_m: float
+    corrected_stack_height_m: float
+    plume_rise_m: float
+    effective_height_m: float
 
 
 def _category(stability):
@@ -53,6 +74,13 @@ def _scalar(name, value, strictly_positive=False):
     if array.ndim != 0 or array < 0 or (strictly_positive and array == 0):
         raise ValueError(name + " must be a scalar " +
                          ("> 0" if strictly_positive else ">= 0"))
+    return float(array)
+
+
+def _signed_scalar(name, value):
+    array = _finite(name, value)
+    if array.ndim != 0:
+        raise ValueError(name + " must be a scalar")
     return float(array)
 
 
@@ -122,6 +150,176 @@ def masters_2008_wind_speed_at_height(
     if exposure == "flat":
         exponent *= .6
     return speed * (target_height / reference_height) ** exponent
+
+
+def briggs_buoyancy_flux(exit_velocity_m_s, stack_diameter_m,
+                         stack_temperature_k, ambient_temperature_k):
+    """Return the Briggs buoyancy flux ``F_b`` in m^4/s^3.
+
+    This is ISC3 equation 1-8 and is algebraically equivalent to Masters and
+    Ela (2008), equation 7.52, after substituting ``r = d/2``.
+    """
+    velocity = _scalar(
+        "exit_velocity_m_s", exit_velocity_m_s, strictly_positive=True)
+    diameter = _scalar(
+        "stack_diameter_m", stack_diameter_m, strictly_positive=True)
+    stack_temperature = _scalar(
+        "stack_temperature_k", stack_temperature_k, strictly_positive=True)
+    ambient_temperature = _scalar(
+        "ambient_temperature_k", ambient_temperature_k,
+        strictly_positive=True)
+    return (BRIGGS_GRAVITY_M_S2 * velocity * diameter ** 2 *
+            (stack_temperature - ambient_temperature) /
+            (4.0 * stack_temperature))
+
+
+def briggs_momentum_flux(exit_velocity_m_s, stack_diameter_m,
+                         stack_temperature_k, ambient_temperature_k):
+    """Return the Briggs momentum flux ``F_m`` in m^4/s^2 (ISC3 1-9)."""
+    velocity = _scalar(
+        "exit_velocity_m_s", exit_velocity_m_s, strictly_positive=True)
+    diameter = _scalar(
+        "stack_diameter_m", stack_diameter_m, strictly_positive=True)
+    stack_temperature = _scalar(
+        "stack_temperature_k", stack_temperature_k, strictly_positive=True)
+    ambient_temperature = _scalar(
+        "ambient_temperature_k", ambient_temperature_k,
+        strictly_positive=True)
+    return (velocity ** 2 * diameter ** 2 * ambient_temperature /
+            (4.0 * stack_temperature))
+
+
+def briggs_stability_parameter(ambient_temperature_k,
+                                ambient_temperature_gradient_k_m):
+    """Return stable-atmosphere parameter ``s`` in s^-2.
+
+    ``ambient_temperature_gradient_k_m`` follows the Masters sign convention:
+    positive when ambient temperature increases with height. The added
+    0.01 K/m converts the actual temperature gradient to the approximate
+    potential-temperature gradient used in equation 7.53.
+    """
+    ambient_temperature = _scalar(
+        "ambient_temperature_k", ambient_temperature_k,
+        strictly_positive=True)
+    gradient = _signed_scalar(
+        "ambient_temperature_gradient_k_m",
+        ambient_temperature_gradient_k_m)
+    parameter = (BRIGGS_GRAVITY_M_S2 / ambient_temperature *
+                 (gradient + 0.01))
+    if parameter <= 0:
+        raise ValueError(
+            "ambient temperature gradient must produce stability parameter > 0")
+    return parameter
+
+
+def briggs_final_plume_rise(
+        *, stack_height_m, stack_diameter_m, exit_velocity_m_s,
+        stack_temperature_k, ambient_temperature_k, wind_speed_stack_m_s,
+        stability, ambient_temperature_gradient_k_m=None,
+        stack_tip_downwash=False):
+    """Calculate final effective height with the Briggs ISC3 equations.
+
+    Classes A-D select automatically between buoyancy and momentum using ISC3
+    equations 1-10 through 1-16. Classes E-F additionally require the actual
+    ambient temperature gradient in K/m and use equations 1-17 through 1-21.
+    Final rise is returned; distance-dependent gradual rise is not applied.
+    """
+    category = _category(stability)
+    stack_height = _scalar("stack_height_m", stack_height_m)
+    diameter = _scalar(
+        "stack_diameter_m", stack_diameter_m, strictly_positive=True)
+    velocity = _scalar(
+        "exit_velocity_m_s", exit_velocity_m_s, strictly_positive=True)
+    stack_temperature = _scalar(
+        "stack_temperature_k", stack_temperature_k, strictly_positive=True)
+    ambient_temperature = _scalar(
+        "ambient_temperature_k", ambient_temperature_k,
+        strictly_positive=True)
+    wind_speed = _scalar(
+        "wind_speed_stack_m_s", wind_speed_stack_m_s,
+        strictly_positive=True)
+    if not isinstance(stack_tip_downwash, (bool, np.bool_)):
+        raise ValueError("stack_tip_downwash must be boolean")
+
+    buoyancy_flux = briggs_buoyancy_flux(
+        velocity, diameter, stack_temperature, ambient_temperature)
+    momentum_flux = briggs_momentum_flux(
+        velocity, diameter, stack_temperature, ambient_temperature)
+    delta_temperature = stack_temperature - ambient_temperature
+
+    downwash = 0.0
+    if stack_tip_downwash and velocity < 1.5 * wind_speed:
+        downwash = 2.0 * diameter * (velocity / wind_speed - 1.5)
+    corrected_height = stack_height + downwash
+    if corrected_height < 0:
+        raise ValueError("stack-tip downwash makes corrected stack height < 0")
+
+    stability_parameter = None
+    crossover = None
+    final_distance = None
+    if category in "ABCD":
+        if delta_temperature > 0:
+            if buoyancy_flux < 55.0:
+                crossover = (0.0297 * stack_temperature *
+                             velocity ** (1.0 / 3.0) /
+                             diameter ** (2.0 / 3.0))
+            else:
+                crossover = (0.00575 * stack_temperature *
+                             velocity ** (2.0 / 3.0) /
+                             diameter ** (1.0 / 3.0))
+        if delta_temperature > 0 and delta_temperature >= crossover:
+            regime = "buoyancy"
+            if buoyancy_flux < 55.0:
+                final_distance = 49.0 * buoyancy_flux ** (5.0 / 8.0)
+                rise = (21.425 * buoyancy_flux ** (3.0 / 4.0) /
+                        wind_speed)
+            else:
+                final_distance = 119.0 * buoyancy_flux ** (2.0 / 5.0)
+                rise = (38.71 * buoyancy_flux ** (3.0 / 5.0) /
+                        wind_speed)
+        else:
+            regime = "momentum"
+            rise = 3.0 * diameter * velocity / wind_speed
+    else:
+        if ambient_temperature_gradient_k_m is None:
+            raise ValueError(
+                "classes E-F require ambient_temperature_gradient_k_m")
+        stability_parameter = briggs_stability_parameter(
+            ambient_temperature, ambient_temperature_gradient_k_m)
+        if delta_temperature > 0:
+            crossover = (0.019582 * stack_temperature * velocity *
+                         np.sqrt(stability_parameter))
+        if delta_temperature > 0 and delta_temperature >= crossover:
+            regime = "buoyancy"
+            final_distance = (2.0715 * wind_speed /
+                              np.sqrt(stability_parameter))
+            rise = 2.6 * (buoyancy_flux /
+                          (wind_speed * stability_parameter)) ** (1.0 / 3.0)
+        else:
+            regime = "momentum"
+            stable_rise = 1.5 * (momentum_flux /
+                                 (wind_speed *
+                                  np.sqrt(stability_parameter))) ** (1.0 / 3.0)
+            neutral_rise = 3.0 * diameter * velocity / wind_speed
+            rise = min(stable_rise, neutral_rise)
+
+    effective_height = corrected_height + rise
+    return BriggsPlumeRise(
+        method="briggs_isc3_final",
+        regime=regime,
+        buoyancy_flux_m4_s3=float(buoyancy_flux),
+        momentum_flux_m4_s2=float(momentum_flux),
+        stability_parameter_s2=(None if stability_parameter is None else
+                                float(stability_parameter)),
+        crossover_temperature_k=(None if crossover is None else
+                                  float(crossover)),
+        distance_to_final_rise_m=(None if final_distance is None else
+                                  float(final_distance)),
+        stack_tip_downwash_m=float(downwash),
+        corrected_stack_height_m=float(corrected_height),
+        plume_rise_m=float(rise),
+        effective_height_m=float(effective_height),
+    )
 
 
 def gaussian_concentration(x_m, y_m, z_m, *, emission_kg_s,
