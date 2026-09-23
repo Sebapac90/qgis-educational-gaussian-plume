@@ -154,8 +154,13 @@ erróneos. En `F_b=55` se usará la rama `F_b ≥ 55`, como especifica ISC3.
 
 En modos sintéticos o CSV, cada clase de velocidad tendrá su propio `u_s`,
 `Δh`, `H` y viento a `H`. No se calculará una sola elevación a partir de la
-velocidad media. La aproximación de agrupación por sectores y clases se volverá
-a contrastar contra el cálculo fila por fila.
+velocidad media. La rosa conserva 16 sectores y siete bandas de velocidad. El
+cálculo con Briggs usa 72 sectores direccionales y clases de velocidad de 1 m/s
+hasta 12 m/s, más una clase abierta. En un caso sintético reproducible de 600
+observaciones, la comparación con el cálculo fila por fila mantuvo la diferencia
+por debajo de 5% en celdas que superan 0,1% del máximo y la diferencia del máximo
+por debajo de 2%. Estos son controles de aproximación numérica, no validación de
+campo.
 
 Cada salida registrará el método, régimen dominante, `F_b`, `F_m`, `s` cuando
 corresponda, descenso en la boca, elevación y altura efectiva. En promedios de

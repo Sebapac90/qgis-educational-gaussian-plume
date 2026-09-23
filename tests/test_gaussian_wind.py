@@ -4,8 +4,11 @@ from pathlib import Path
 
 import numpy as np
 
+from gaussian_core import (briggs_final_plume_rise,
+                           masters_2008_wind_speed_at_height)
 from gaussian_spatial import ground_concentration, locate_source, make_grid
-from gaussian_wind import (CALCULATION_DIRECTION_SECTORS,
+from gaussian_wind import (BriggsStackParameters,
+                           CALCULATION_DIRECTION_SECTORS,
                            ROSE_DIRECTION_SECTORS, WindSeries,
                            aggregate_wind_for_calculation,
                            mean_ground_concentration, save_wind_rose,
@@ -118,6 +121,115 @@ class WindTests(unittest.TestCase):
         np.testing.assert_allclose(
             adjusted[valid], unadjusted[valid] / expected_factor,
             rtol=1e-14)
+
+    def test_briggs_uses_stack_wind_then_effective_height_wind(self):
+        wind = wind_from_config(self.model)
+        stack = BriggsStackParameters(
+            stack_height_m=50., stack_diameter_m=2.,
+            exit_velocity_m_s=10., stack_temperature_k=400.,
+            ambient_temperature_k=300.)
+        actual, summary = mean_ground_concentration(
+            self.grid, wind, emission_kg_s=.04, stability="D",
+            wind_reference_height_m=10., wind_exposure="rough",
+            briggs_stack=stack, return_height_summary=True)
+        stack_speed = float(masters_2008_wind_speed_at_height(
+            5., 10., 50., "D", "rough"))
+        plume = briggs_final_plume_rise(
+            stack_height_m=50., stack_diameter_m=2.,
+            exit_velocity_m_s=10., stack_temperature_k=400.,
+            ambient_temperature_k=300., wind_speed_stack_m_s=stack_speed,
+            stability="D")
+        effective_speed = float(masters_2008_wind_speed_at_height(
+            5., 10., plume.effective_height_m, "D", "rough"))
+        expected = ground_concentration(
+            self.grid, wind_from_deg=25., emission_kg_s=.04,
+            wind_speed_m_s=effective_speed,
+            effective_height_m=plume.effective_height_m, stability="D")
+        np.testing.assert_allclose(actual, expected, rtol=1e-14)
+        self.assertEqual(summary.mode, "briggs")
+        self.assertAlmostEqual(summary.plume_rise_mean_m,
+                               plume.plume_rise_m)
+        self.assertAlmostEqual(summary.effective_height_mean_m,
+                               plume.effective_height_m)
+        self.assertAlmostEqual(summary.buoyancy_weight, 1.)
+        self.assertAlmostEqual(summary.momentum_weight, 0.)
+
+    def test_briggs_is_calculated_for_each_wind_speed_class(self):
+        wind = WindSeries(
+            "table", np.array([0., 90.]), np.array([2., 8.]),
+            np.array([.25, .75]), None, None, None, "test")
+        stack = BriggsStackParameters(
+            stack_height_m=50., stack_diameter_m=2.,
+            exit_velocity_m_s=10., stack_temperature_k=400.,
+            ambient_temperature_k=300.)
+        actual, summary = mean_ground_concentration(
+            self.grid, wind, emission_kg_s=.04, stability="D",
+            wind_reference_height_m=10., briggs_stack=stack,
+            direction_sectors=None, return_height_summary=True)
+        expected = np.zeros(self.grid.shape)
+        rises = []
+        heights = []
+        for direction, speed, weight in zip(
+                wind.directions_from_deg, wind.speeds_m_s, wind.weights):
+            stack_speed = float(masters_2008_wind_speed_at_height(
+                speed, 10., 50., "D", "rough"))
+            plume = briggs_final_plume_rise(
+                stack_height_m=50., stack_diameter_m=2.,
+                exit_velocity_m_s=10., stack_temperature_k=400.,
+                ambient_temperature_k=300.,
+                wind_speed_stack_m_s=stack_speed, stability="D")
+            effective_speed = float(masters_2008_wind_speed_at_height(
+                speed, 10., plume.effective_height_m, "D", "rough"))
+            expected += weight * ground_concentration(
+                self.grid, wind_from_deg=direction, emission_kg_s=.04,
+                wind_speed_m_s=effective_speed,
+                effective_height_m=plume.effective_height_m, stability="D")
+            rises.append(plume.plume_rise_m)
+            heights.append(plume.effective_height_m)
+        np.testing.assert_allclose(actual, expected, rtol=1e-14)
+        self.assertNotAlmostEqual(rises[0], rises[1])
+        self.assertAlmostEqual(
+            summary.plume_rise_mean_m, np.average(rises, weights=wind.weights))
+        self.assertAlmostEqual(
+            summary.effective_height_mean_m,
+            np.average(heights, weights=wind.weights))
+
+    def test_briggs_grouping_stays_close_to_row_wise_calculation(self):
+        rng = np.random.default_rng(718)
+        samples = 600
+        wind = WindSeries(
+            "table", rng.normal(45., 35., samples) % 360.,
+            np.clip(rng.lognormal(1.35, .45, samples), .4, 15.),
+            np.full(samples, 1. / samples), None, None, None, "test")
+        stack = BriggsStackParameters(50., 2., 10., 400., 300.)
+        row_wise = mean_ground_concentration(
+            self.grid, wind, emission_kg_s=.04, stability="D",
+            wind_reference_height_m=10., briggs_stack=stack,
+            direction_sectors=None)
+        grouped = mean_ground_concentration(
+            self.grid, wind, emission_kg_s=.04, stability="D",
+            wind_reference_height_m=10., briggs_stack=stack)
+        valid = (np.isfinite(row_wise) &
+                 (row_wise > np.nanmax(row_wise) * .001))
+        relative = np.abs(grouped[valid] - row_wise[valid]) / row_wise[valid]
+        self.assertLess(float(np.max(relative)), .05)
+        self.assertLess(
+            abs(float(np.nanmax(grouped) / np.nanmax(row_wise) - 1.)), .02)
+
+    def test_briggs_height_configuration_is_explicit(self):
+        wind = wind_from_config(self.model)
+        stack = BriggsStackParameters(50., 2., 10., 400., 300.)
+        with self.assertRaisesRegex(ValueError, "mutually exclusive"):
+            mean_ground_concentration(
+                self.grid, wind, emission_kg_s=.04,
+                effective_height_m=50., stability="D", briggs_stack=stack)
+        with self.assertRaisesRegex(ValueError, "required without"):
+            mean_ground_concentration(
+                self.grid, wind, emission_kg_s=.04, stability="D")
+        with self.assertRaisesRegex(ValueError, "gradient"):
+            mean_ground_concentration(
+                self.grid, wind, emission_kg_s=.04, stability="E",
+                briggs_stack=stack)
 
     def test_weighted_table_and_wind_rose(self):
         with tempfile.TemporaryDirectory() as directory:

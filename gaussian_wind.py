@@ -12,10 +12,12 @@ import math
 import numpy as np
 
 try:  # package form used by the built QGIS plugin
-    from .gaussian_core import (masters_2008_minimum_positive_x_m,
+    from .gaussian_core import (briggs_final_plume_rise,
+                                masters_2008_minimum_positive_x_m,
                                 masters_2008_wind_speed_at_height)
 except ImportError:  # standalone notebooks and scripts
-    from gaussian_core import (masters_2008_minimum_positive_x_m,
+    from gaussian_core import (briggs_final_plume_rise,
+                               masters_2008_minimum_positive_x_m,
                                masters_2008_wind_speed_at_height)
 
 try:  # package form used by the built QGIS plugin
@@ -29,6 +31,8 @@ ROSE_DIRECTION_SECTORS = 16
 CALCULATION_DIRECTION_SECTORS = 72
 SPEED_CLASS_EDGES_M_S = np.array(
     [0., 2., 4., 6., 8., 10., 12., np.inf])
+BRIGGS_CALCULATION_SPEED_CLASS_EDGES_M_S = np.concatenate(
+    (np.arange(0., 13., 1.), [np.inf]))
 
 
 def _finite(name, value):
@@ -84,6 +88,34 @@ class WindSeries:
         sine = np.average(np.sin(angles), weights=self.weights)
         cosine = np.average(np.cos(angles), weights=self.weights)
         return float(np.hypot(sine, cosine))
+
+
+@dataclass(frozen=True)
+class BriggsStackParameters:
+    """Physical stack and temperature inputs for Briggs final plume rise."""
+
+    stack_height_m: float
+    stack_diameter_m: float
+    exit_velocity_m_s: float
+    stack_temperature_k: float
+    ambient_temperature_k: float
+    ambient_temperature_gradient_k_m: Optional[float] = None
+    stack_tip_downwash: bool = False
+
+
+@dataclass(frozen=True)
+class PlumeHeightSummary:
+    """Weighted range of heights applied across calculated wind classes."""
+
+    mode: str
+    plume_rise_min_m: float
+    plume_rise_max_m: float
+    plume_rise_mean_m: float
+    effective_height_min_m: float
+    effective_height_max_m: float
+    effective_height_mean_m: float
+    buoyancy_weight: float
+    momentum_weight: float
 
 
 def _series(mode, directions, speeds, weights, representative, spread, seed,
@@ -260,7 +292,8 @@ def wind_from_config(model, *, base_dir=None):
 
 
 def aggregate_wind_for_calculation(
-        wind, direction_sectors=CALCULATION_DIRECTION_SECTORS):
+        wind, direction_sectors=CALCULATION_DIRECTION_SECTORS,
+        speed_class_edges_m_s=SPEED_CLASS_EDGES_M_S):
     """Group wind into direction-speed classes for spatial calculation.
 
     The wind rose retains its independent 16-sector display. Within each
@@ -268,6 +301,12 @@ def aggregate_wind_for_calculation(
     weighted direction and the Gaussian equation's inverse-speed amplitude.
     """
     sectors = _positive_integer("direction_sectors", direction_sectors)
+    speed_edges = np.asarray(speed_class_edges_m_s, dtype=float)
+    if (speed_edges.ndim != 1 or len(speed_edges) < 2 or
+            speed_edges[0] != 0 or not np.isinf(speed_edges[-1]) or
+            np.any(np.diff(speed_edges) <= 0)):
+        raise ValueError(
+            "speed_class_edges_m_s must increase from 0 to infinity")
     if wind.samples == 1:
         return wind
     width = 360.0 / sectors
@@ -275,12 +314,12 @@ def aggregate_wind_for_calculation(
         (wind.directions_from_deg + width / 2.0) / width
     ).astype(int) % sectors
     speed_class = np.searchsorted(
-        SPEED_CLASS_EDGES_M_S, wind.speeds_m_s, side="right") - 1
+        speed_edges, wind.speeds_m_s, side="right") - 1
     speed_class = np.clip(
-        speed_class, 0, len(SPEED_CLASS_EDGES_M_S) - 2)
+        speed_class, 0, len(speed_edges) - 2)
     directions, speeds, weights = [], [], []
     for direction_index in range(sectors):
-        for speed_index in range(len(SPEED_CLASS_EDGES_M_S) - 1):
+        for speed_index in range(len(speed_edges) - 1):
             selected = ((direction_class == direction_index) &
                         (speed_class == speed_index))
             if not np.any(selected):
@@ -306,16 +345,35 @@ def aggregate_wind_for_calculation(
 
 
 def mean_ground_concentration(grid, wind, *, emission_kg_s,
-                              effective_height_m, stability,
+                              effective_height_m=None, stability,
                               max_evaluations=None, progress_callback=None,
                               is_canceled=None,
                               direction_sectors=CALCULATION_DIRECTION_SECTORS,
                               wind_reference_height_m=None,
-                              wind_exposure="rough"):
-    """Return the weighted mean of stationary fields without changing the core."""
+                              wind_exposure="rough", briggs_stack=None,
+                              return_height_summary=False):
+    """Return the weighted mean of stationary fields.
+
+    With ``briggs_stack``, each calculation wind class obtains its own wind at
+    stack height, final plume rise, effective height and wind at that effective
+    height. Without it, the established fixed-height calculation is preserved.
+    Set ``return_height_summary`` to return ``(field, summary)``.
+    """
+    if briggs_stack is not None and not isinstance(
+            briggs_stack, BriggsStackParameters):
+        raise ValueError("briggs_stack must be BriggsStackParameters")
+    if briggs_stack is None and effective_height_m is None:
+        raise ValueError("effective_height_m is required without briggs_stack")
+    if briggs_stack is not None and effective_height_m is not None:
+        raise ValueError(
+            "effective_height_m and briggs_stack are mutually exclusive")
     calculation_wind = (wind if direction_sectors is None else
                         aggregate_wind_for_calculation(
-                            wind, direction_sectors=direction_sectors))
+                            wind, direction_sectors=direction_sectors,
+                            speed_class_edges_m_s=(
+                                BRIGGS_CALCULATION_SPEED_CLASS_EDGES_M_S
+                                if briggs_stack is not None else
+                                SPEED_CLASS_EDGES_M_S)))
     evaluations = int(np.prod(grid.shape)) * calculation_wind.samples
     if max_evaluations is not None and evaluations > max_evaluations:
         recommended = grid.resolution_m * math.sqrt(evaluations / max_evaluations)
@@ -325,21 +383,57 @@ def mean_ground_concentration(grid, wind, *, emission_kg_s,
             "the domain.".format(evaluations, max_evaluations,
                                  math.ceil(recommended)))
     total = np.zeros(grid.shape, dtype=float)
-    wind_factor = 1.0
-    if wind_reference_height_m is not None:
-        wind_factor = float(masters_2008_wind_speed_at_height(
+    fixed_wind_factor = 1.0
+    if briggs_stack is None and wind_reference_height_m is not None:
+        fixed_wind_factor = float(masters_2008_wind_speed_at_height(
             1.0, wind_reference_height_m, effective_height_m,
             stability, wind_exposure))
+    rises, heights, height_weights = [], [], []
+    buoyancy_weight = 0.0
+    momentum_weight = 0.0
     for index, (direction, speed, weight) in enumerate(zip(
             calculation_wind.directions_from_deg,
             calculation_wind.speeds_m_s,
             calculation_wind.weights), start=1):
         if is_canceled is not None and is_canceled():
             raise InterruptedError("Wind averaging canceled")
+        if briggs_stack is None:
+            height = effective_height_m
+            model_speed = speed * fixed_wind_factor
+            rise = 0.0
+        else:
+            reference_height = (briggs_stack.stack_height_m
+                                if wind_reference_height_m is None else
+                                wind_reference_height_m)
+            stack_speed = float(masters_2008_wind_speed_at_height(
+                speed, reference_height, briggs_stack.stack_height_m,
+                stability, wind_exposure))
+            plume = briggs_final_plume_rise(
+                stack_height_m=briggs_stack.stack_height_m,
+                stack_diameter_m=briggs_stack.stack_diameter_m,
+                exit_velocity_m_s=briggs_stack.exit_velocity_m_s,
+                stack_temperature_k=briggs_stack.stack_temperature_k,
+                ambient_temperature_k=briggs_stack.ambient_temperature_k,
+                wind_speed_stack_m_s=stack_speed,
+                stability=stability,
+                ambient_temperature_gradient_k_m=(
+                    briggs_stack.ambient_temperature_gradient_k_m),
+                stack_tip_downwash=briggs_stack.stack_tip_downwash)
+            height = plume.effective_height_m
+            rise = plume.plume_rise_m
+            model_speed = float(masters_2008_wind_speed_at_height(
+                speed, reference_height, height, stability, wind_exposure))
+            if plume.regime == "buoyancy":
+                buoyancy_weight += weight
+            else:
+                momentum_weight += weight
+        rises.append(rise)
+        heights.append(height)
+        height_weights.append(weight)
         total += weight * ground_concentration(grid, wind_from_deg=direction,
             emission_kg_s=emission_kg_s,
-            wind_speed_m_s=speed * wind_factor,
-            effective_height_m=effective_height_m, stability=stability,
+            wind_speed_m_s=model_speed,
+            effective_height_m=height, stability=stability,
             mask_near_source=False)
         if progress_callback is not None:
             progress_callback(index / calculation_wind.samples)
@@ -349,7 +443,24 @@ def mean_ground_concentration(grid, wind, *, emission_kg_s,
     radius = np.hypot(east - grid.source.easting_m,
                       north - grid.source.northing_m)
     total[radius <= minimum_x] = np.nan
-    return total
+    if not return_height_summary:
+        return total
+    rises = np.asarray(rises, dtype=float)
+    heights = np.asarray(heights, dtype=float)
+    height_weights = np.asarray(height_weights, dtype=float)
+    summary = PlumeHeightSummary(
+        mode="briggs" if briggs_stack is not None else "fixed",
+        plume_rise_min_m=float(np.min(rises)),
+        plume_rise_max_m=float(np.max(rises)),
+        plume_rise_mean_m=float(np.average(rises, weights=height_weights)),
+        effective_height_min_m=float(np.min(heights)),
+        effective_height_max_m=float(np.max(heights)),
+        effective_height_mean_m=float(np.average(
+            heights, weights=height_weights)),
+        buoyancy_weight=float(buoyancy_weight),
+        momentum_weight=float(momentum_weight),
+    )
+    return total, summary
 
 
 def save_wind_rose(wind, output_path, *, language="es"):
