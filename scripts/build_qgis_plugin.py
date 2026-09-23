@@ -8,15 +8,21 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "qgis_plugin/gaussian_educativo"
 DIST = ROOT / "dist"
-VERSION = "0.14.0"
+VERSION = "0.15.0"
 ZIP_TIMESTAMP = (1980, 1, 1, 0, 0, 0)
 
 
 def main():
     DIST.mkdir(exist_ok=True)
     archive = DIST / "gaussian_educativo-{}.zip".format(VERSION)
-    files = [path for path in SOURCE.rglob("*")
-             if path.is_file() and "__pycache__" not in path.parts]
+    files = []
+    for path in SOURCE.rglob("*"):
+        relative = path.relative_to(SOURCE)
+        if (not path.is_file() or "__pycache__" in relative.parts or
+                any(part.startswith(".") for part in relative.parts) or
+                path.suffix in (".pyc", ".pyo")):
+            continue
+        files.append(path)
     with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as bundle:
         for path in sorted(files):
             relative = path.relative_to(SOURCE)

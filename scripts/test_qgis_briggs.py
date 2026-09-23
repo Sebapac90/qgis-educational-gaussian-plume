@@ -9,7 +9,9 @@ from check_qgis_runtime import configure_application, configure_macos_qgis_bundl
 
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "qgis_plugin"))
+PLUGIN_PARENT = Path(os.environ.get(
+    "GAUSSIAN_QGIS_PLUGIN_PARENT", str(ROOT / "qgis_plugin")))
+sys.path.insert(0, str(PLUGIN_PARENT))
 
 
 def main():
