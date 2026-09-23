@@ -1,11 +1,11 @@
-# Compatibilidad e idiomas · 0.14.0 · 2026-09-22
+# Compatibilidad e idiomas · 0.14.0 · 2026-09-23
 
 | Sistema / versión | Estado |
 |---|---|
 | macOS Intel · QGIS 3.40.5 · Qt5 | Probado con el ZIP: cálculo, CSV, extensión, cancelación e idiomas |
 | macOS Apple Silicon · QGIS 3.44.14 LTR · Qt5 | Batería automática nativa y prueba funcional del usuario aprobadas con el ZIP 0.14.0 |
 | macOS Intel/Rosetta · QGIS 3.44.14 LTR · Qt5 | Batería automática aprobada con el ZIP 0.9.1 |
-| Windows · QGIS 3.44 LTR | Pendiente: no hay entorno Windows disponible en esta sesión |
+| Windows 10 · QGIS 3.44 LTR | Prueba funcional manual del usuario aprobada con el ZIP 0.14.0 |
 | QGIS 4 · Qt6 | Pendiente de adaptación y pruebas; metadata limita la serie a 3.x |
 
 La versión 0.10.0 añade al panel los modos predominante y aleatorio uniforme
@@ -31,8 +31,10 @@ y los metadatos.
 La versión 0.14.0 consolida Masters 2008 como formulación única, junto con la altura
 de medición del viento y la exposición rugosa o plana. La batería automática
 pasó con el Python de QGIS LTR en macOS y verificó también el NoData próximo a
-la fuente. El usuario instaló y probó funcionalmente el ZIP 0.14.0 en su Mac y
-confirmó su funcionamiento. Windows y QGIS 4 continúan pendientes de una prueba real.
+la fuente. El usuario instaló y probó funcionalmente el ZIP 0.14.0 en macOS y
+en Windows 10 con QGIS 3.44 LTR. En ambos sistemas confirmó el cálculo, las
+salidas georreferenciadas, la simbología y la reapertura del proyecto. QGIS 4
+continúa pendiente de adaptación y prueba real.
 
 La versión 0.12.0 integra el asistente de CSV de tres columnas y su prueba
 automática dentro del panel QGIS. Usa solamente la biblioteca estándar de
@@ -66,9 +68,10 @@ en el Python de QGIS.
 
 En QGIS 3.40.5 y 3.44.14 para Mac estas bibliotecas ya estaban disponibles y no
 se instaló ningún paquete. En 3.44.14 nativo se comprobaron Python 3.12.11,
-NumPy 2.5.2, GDAL 3.13.3, PROJ 9.8, PyProj 3.7.2 y Matplotlib 3.11.1. Esto no
-garantiza su presencia en todos los distribuidores de QGIS; Windows continúa
-pendiente.
+NumPy 2.5.2, GDAL 3.13.3, PROJ 9.8, PyProj 3.7.2 y Matplotlib 3.11.1. En
+Windows 10, la instalación estándar de QGIS 3.44 LTR utilizada por el usuario
+ejecutó el complemento sin instalar paquetes adicionales. Esto no garantiza
+su presencia en otros distribuidores o instalaciones personalizadas de QGIS.
 
 Comprobación sin instalar ni cambiar nada, desde la consola Python de QGIS:
 
@@ -132,5 +135,7 @@ x86_64/Rosetta. Sus informes están en `validation/qgis_344_arm64_091/` y
 `validation/qgis_344_091/`; el control equivalente de 3.40 está en
 `validation/qgis_340_091/`. La corrección 0.9.1 prepara CRS/PyProj en el hilo
 principal antes de iniciar la tarea: evita el fallo reproducido dentro de PROJ
-en un trabajador Qt sin cambiar el cálculo. Mantener el paquete experimental
-hasta la aceptación humana de los diálogos nativos y la prueba en Windows.
+en un trabajador Qt sin cambiar el cálculo. El usuario completó además el
+recorrido funcional con el ZIP 0.14.0 en Windows 10 y QGIS 3.44 LTR el
+2026-09-23. El paquete permanece experimental por su alcance docente y porque
+QGIS 4/Qt6 aún no está soportado.

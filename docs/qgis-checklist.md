@@ -1,7 +1,7 @@
 # Validación manual del hito espacial en QGIS
 
-Estado: **versión 0.14.0 aceptada en la prueba funcional del usuario en macOS,
-2026-09-22**. No marcar una casilla solo porque
+Estado: **versión 0.14.0 aceptada en pruebas funcionales del usuario en macOS
+(2026-09-22) y Windows 10 con QGIS 3.44 LTR (2026-09-23)**. No marcar una casilla solo porque
 las pruebas Python pasan. Usar `outputs/patache/` recién generado y registrar
 fecha, responsable, sistema operativo, versiones QGIS/Python/GDAL/PROJ,
 resultado de cada comprobación y capturas o incidencias.
@@ -45,6 +45,11 @@ basado únicamente en Masters y confirmó que funciona correctamente. Esta
 aceptación cubre el recorrido funcional realizado en su QGIS habitual. Las
 casillas específicas que todavía aparecen abiertas conservan su carácter de
 pruebas adicionales y de documentación para publicación.
+
+Confirmación manual Windows, 2026-09-23: el usuario instaló el mismo ZIP 0.14.0
+en Windows 10 con QGIS 3.44 LTR y completó sin incidencias el recorrido de
+instalación, cálculo constante y CSV, revisión de capas y CRS, simbología y
+reapertura del proyecto.
 
 Ensayo 0.12.0: el panel incorpora «Preparar CSV…». La prueba automática asigna
 columnas con nombres libres, fecha `DD/MM/AAAA HH:MM`, UTC, rumbos cardinales y

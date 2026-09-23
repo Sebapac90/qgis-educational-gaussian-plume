@@ -242,10 +242,11 @@ quedó respaldada. No se cerraron ventanas con proyectos del usuario.
 `docs/compatibility.md` registra dependencias, pruebas por plataforma y cómo
 ejecutar `scripts/check_qgis_installation.py` desde la consola QGIS. En Mac
 Intel 3.40.5 están disponibles NumPy, GDAL, PyProj y Matplotlib sin instalación
-adicional. Windows, Apple Silicon y QGIS 3.44 LTR siguen pendientes. QGIS 4 no
-se declara compatible: metadata limita explícitamente a 3.x hasta completar la
-migración y las pruebas Qt6. Las pruebas de arranque limpio anteriores son de
-0.8.1 y no se atribuyen a la versión 0.9.0 sin repetirlas.
+adicional. La versión 0.14.0 fue aceptada manualmente en Apple Silicon y en
+Windows 10 con QGIS 3.44 LTR. QGIS 4 no se declara compatible: metadata limita
+explícitamente a 3.x hasta completar la migración y las pruebas Qt6. Las
+pruebas de arranque limpio anteriores son de 0.8.1 y no se atribuyen a la
+versión 0.9.0 sin repetirlas.
 
 ## Diálogos reales y repetición bilingüe · 0.9.0 · 2026-09-13
 
