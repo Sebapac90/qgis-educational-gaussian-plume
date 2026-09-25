@@ -59,6 +59,9 @@ La política predeterminada conserva el dominio solicitado y advierte si la plum
 
 El modelo usa reflexión perfecta en el suelo. La altura puede tratarse sin elevación, ingresarse como altura efectiva manual o calcularse como elevación final con Briggs. Las unidades internas son kg/s, m/s, m y kg/m³; las conversiones de entrada y salida son explícitas.
 
+La comparación de los componentes compartidos con el cuaderno Manchester y sus
+límites está documentada en [docs/manchester-correspondence.md](docs/manchester-correspondence.md).
+
 La formulación, los supuestos y las decisiones están documentados en [docs/model.md](docs/model.md). La política espacial se describe en [docs/spatial.md](docs/spatial.md).
 
 ## Fundamento e inspiración
