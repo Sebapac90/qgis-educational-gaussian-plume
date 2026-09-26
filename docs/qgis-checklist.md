@@ -164,11 +164,12 @@ un caso con ausentes.
   aplicarse directamente las ecuaciones 7.47–7.48, sin interpolación ni
   recorte.
 - [ ] **Elevación final Briggs:** seleccionar «Briggs calculado» y comprobar
-  que se habiliten diámetro, velocidad de salida, temperaturas, gradiente y
-  descenso en la boca. Usar chimenea 50 m, diámetro 2 m, salida 10 m/s, gas
-  126,85 °C, ambiente 26,85 °C, clase D, viento 5 m/s medido a 10 m y
-  exposición rugosa. La ejecución automática en QGIS 3.44 LTR obtuvo elevación
-  31,556068 m y altura efectiva 81,556068 m. Confirmar en el GeoTIFF
+  que aparezca el botón «Configurar Briggs…». Abrirlo y comprobar que contiene
+  diámetro, velocidad de salida, temperaturas, gradiente y descenso en la boca.
+  Usar chimenea 50 m, diámetro 2 m, salida 10 m/s, gas 126,85 °C, ambiente
+  26,85 °C, clase D, viento 5 m/s medido a 10 m y exposición rugosa. La
+  ejecución automática en QGIS 3.44 LTR obtuvo elevación 31,556068 m y altura
+  efectiva 81,556068 m. Confirmar en el GeoTIFF
   `height_mode=briggs`, `stack_height_m=50.0`, `plume_rise_m=31.556068...` y
   `effective_height_m=81.556068...`. Guardar, cerrar y abrir el escenario; debe
   recuperar los parámetros. Abrir además un escenario 0.14.0 y confirmar que

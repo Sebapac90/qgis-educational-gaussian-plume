@@ -52,7 +52,7 @@ class FakeInterface:
 
 def main():
     contents = configure_macos_qgis_bundle()
-    from qgis.PyQt.QtWidgets import QMainWindow
+    from qgis.PyQt.QtWidgets import QDialog, QMainWindow
     from qgis.core import (QgsApplication, QgsCoordinateReferenceSystem,
                            QgsPointXY, QgsRectangle)
     from qgis.gui import QgsMapCanvas
@@ -103,6 +103,38 @@ def main():
         dock.domain_policy_combo.setCurrentIndex(1)
         dock.concentration_unit_combo.setCurrentIndex(2)
         dock.contour_minimum_spin.setValue(0.5)
+        briggs_hidden_outside_mode = dock.briggs_button.isHidden()
+        dock.height_mode_combo.setCurrentIndex(2)
+        dock.stack_diameter_spin.setValue(2.5)
+        dock.exit_velocity_spin.setValue(11.0)
+        dock.stack_temperature_spin.setValue(130.0)
+        dock.ambient_temperature_spin.setValue(25.0)
+        dock.ambient_gradient_spin.setValue(2.5)
+        dock.stack_tip_downwash_combo.setCurrentIndex(1)
+        briggs_visible_in_mode = not dock.briggs_button.isHidden()
+        briggs_dialog_parameters = dock.algorithm_parameters()
+        briggs_dialog_configured = (
+            dock.briggs_dialog.parent() is dock and
+            dock.briggs_dialog.windowTitle() == 'Configurar elevación Briggs' and
+            briggs_dialog_parameters['HEIGHT_MODE'] == 2 and
+            briggs_dialog_parameters['STACK_DIAMETER'] == 2.5 and
+            briggs_dialog_parameters['EXIT_VELOCITY'] == 11.0 and
+            briggs_dialog_parameters['STACK_TEMPERATURE_C'] == 130.0 and
+            briggs_dialog_parameters['AMBIENT_TEMPERATURE_C'] == 25.0 and
+            briggs_dialog_parameters['AMBIENT_GRADIENT_C_KM'] == 2.5 and
+            briggs_dialog_parameters['STACK_TIP_DOWNWASH'] == 1)
+        before_briggs_cancel = dock.algorithm_parameters()
+
+        def reject_changed_briggs_dialog():
+            dock.stack_diameter_spin.setValue(4.0)
+            dock.stack_tip_downwash_combo.setCurrentIndex(0)
+            return QDialog.Rejected
+
+        with patch.object(dock.briggs_dialog, 'exec',
+                          side_effect=reject_changed_briggs_dialog):
+            dock.configure_briggs()
+        briggs_cancel_preserves_values = (
+            dock.algorithm_parameters() == before_briggs_cancel)
         customized = dock.algorithm_parameters()
         with tempfile.TemporaryDirectory(prefix="gaussian-panel-") as temporary:
             import_source = Path(temporary) / "viento_usuario.csv"
@@ -206,6 +238,10 @@ def main():
             "canceled_file_dialog_unchanged": canceled_dialog_unchanged,
             "invalid_scenario_preserves_inputs": invalid_unchanged,
             "csv_import_dialog": importer_passed,
+            "briggs_hidden_outside_mode": briggs_hidden_outside_mode,
+            "briggs_visible_in_mode": briggs_visible_in_mode,
+            "briggs_dialog_configured": briggs_dialog_configured,
+            "briggs_cancel_preserves_values": briggs_cancel_preserves_values,
         }
         checks = [
             "EPSG:4326" in report["original"],
@@ -243,6 +279,8 @@ def main():
             roundtrip, csv_recovered, tamper_rejected,
             portable_csv, button_save, canceled_dialog_unchanged, invalid_unchanged,
             importer_passed,
+            briggs_hidden_outside_mode, briggs_visible_in_mode,
+            briggs_dialog_configured, briggs_cancel_preserves_values,
             report["direct_scenario"] == "Patache docente",
             report["direct_directory"] == "Patache_docente",
             direct_paths["OUTPUT"].endswith(

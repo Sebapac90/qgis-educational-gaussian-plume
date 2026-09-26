@@ -168,6 +168,56 @@ class WindCsvImportDialog(QDialog):
         self.accept()
 
 
+class BriggsParametersDialog(QDialog):
+    """Keep optional Briggs inputs out of the main simulation dock."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle(tr('Configurar elevación Briggs'))
+        self.setMinimumWidth(390)
+        layout = QVBoxLayout(self)
+        note = QLabel(tr(
+            'Estos parámetros se usan solo con «Briggs calculado». La rapidez '
+            'del viento y la clase de estabilidad se toman del panel principal. '
+            'Para las clases E–F indique el gradiente vertical ambiente.'))
+        note.setWordWrap(True)
+        layout.addWidget(note)
+        form = QFormLayout()
+        self.stack_diameter_spin = self._spin(2.0, 1e-6, 10000.0, 3, " m")
+        self.exit_velocity_spin = self._spin(10.0, 1e-6, 10000.0, 3, " m/s")
+        self.stack_temperature_spin = self._spin(
+            126.85, -273.14, 5000.0, 2, " °C")
+        self.ambient_temperature_spin = self._spin(
+            26.85, -273.14, 1000.0, 2, " °C")
+        self.ambient_gradient_spin = self._spin(
+            2.0, -9.999999, 1000.0, 3, " °C/km")
+        self.stack_tip_downwash_combo = QComboBox()
+        self.stack_tip_downwash_combo.addItems(
+            [tr('Desactivado'), tr('Activado')])
+        form.addRow(tr('Diámetro interior:'), self.stack_diameter_spin)
+        form.addRow(tr('Velocidad de salida:'), self.exit_velocity_spin)
+        form.addRow(tr('Temperatura del gas:'), self.stack_temperature_spin)
+        form.addRow(tr('Temperatura ambiente:'), self.ambient_temperature_spin)
+        form.addRow(tr('Gradiente para E–F:'), self.ambient_gradient_spin)
+        form.addRow(tr('Descenso en la boca:'), self.stack_tip_downwash_combo)
+        layout.addLayout(form)
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+    @staticmethod
+    def _spin(value, minimum, maximum, decimals=3, suffix=""):
+        widget = QDoubleSpinBox()
+        widget.setDecimals(decimals)
+        widget.setRange(minimum, maximum)
+        widget.setValue(value)
+        widget.setSuffix(suffix)
+        widget.setKeyboardTracking(False)
+        return widget
+
+
 class GaussianDock(QgsDockWidget):
     """Select a source, inspect coordinates and run the teaching case."""
 
@@ -269,16 +319,16 @@ class GaussianDock(QgsDockWidget):
         self.height_mode_combo = self._combo([
             tr('Sin elevación'), tr('Altura efectiva manual'),
             tr('Briggs calculado')], 0)
-        self.stack_diameter_spin = self._spin(2.0, 1e-6, 10000.0, 3, " m")
-        self.exit_velocity_spin = self._spin(10.0, 1e-6, 10000.0, 3, " m/s")
-        self.stack_temperature_spin = self._spin(
-            126.85, -273.14, 5000.0, 2, " °C")
-        self.ambient_temperature_spin = self._spin(
-            26.85, -273.14, 1000.0, 2, " °C")
-        self.ambient_gradient_spin = self._spin(
-            2.0, -9.999999, 1000.0, 3, " °C/km")
-        self.stack_tip_downwash_combo = self._combo([
-            tr('Desactivado'), tr('Activado')], 0)
+        self.briggs_dialog = BriggsParametersDialog(self)
+        self.stack_diameter_spin = self.briggs_dialog.stack_diameter_spin
+        self.exit_velocity_spin = self.briggs_dialog.exit_velocity_spin
+        self.stack_temperature_spin = self.briggs_dialog.stack_temperature_spin
+        self.ambient_temperature_spin = self.briggs_dialog.ambient_temperature_spin
+        self.ambient_gradient_spin = self.briggs_dialog.ambient_gradient_spin
+        self.stack_tip_downwash_combo = (
+            self.briggs_dialog.stack_tip_downwash_combo)
+        self.briggs_button = QPushButton(tr('Configurar Briggs…'))
+        self.briggs_button.clicked.connect(self.configure_briggs)
         self.height_mode_combo.currentIndexChanged.connect(
             self._sync_height_controls)
         self.stability_combo = self._combo(list("ABCDEF"), 3)
@@ -291,16 +341,7 @@ class GaussianDock(QgsDockWidget):
                           self.height_mode_combo)
         self.height_label = QLabel()
         model_form.addRow(self.height_label, self.height_spin)
-        model_form.addRow(tr('Diámetro interior:'), self.stack_diameter_spin)
-        model_form.addRow(tr('Velocidad de salida:'), self.exit_velocity_spin)
-        model_form.addRow(tr('Temperatura del gas:'),
-                          self.stack_temperature_spin)
-        model_form.addRow(tr('Temperatura ambiente:'),
-                          self.ambient_temperature_spin)
-        model_form.addRow(tr('Gradiente para E–F:'),
-                          self.ambient_gradient_spin)
-        model_form.addRow(tr('Descenso en la boca:'),
-                          self.stack_tip_downwash_combo)
+        model_form.addRow("", self.briggs_button)
         model_form.addRow(tr('Estabilidad:'), self.stability_combo)
         model_form.addRow(
             tr('Altura de medición del viento:'),
@@ -524,11 +565,24 @@ class GaussianDock(QgsDockWidget):
         self.height_label.setText(
             tr('Altura efectiva:') if mode == 1 else
             tr('Altura de la chimenea:'))
-        for widget in (
-                self.stack_diameter_spin, self.exit_velocity_spin,
-                self.stack_temperature_spin, self.ambient_temperature_spin,
-                self.ambient_gradient_spin, self.stack_tip_downwash_combo):
-            widget.setEnabled(briggs)
+        self.briggs_button.setVisible(briggs)
+
+    def configure_briggs(self):
+        previous = (
+            self.stack_diameter_spin.value(), self.exit_velocity_spin.value(),
+            self.stack_temperature_spin.value(),
+            self.ambient_temperature_spin.value(),
+            self.ambient_gradient_spin.value(),
+            self.stack_tip_downwash_combo.currentIndex())
+        if self.briggs_dialog.exec() == QDialog.Accepted:
+            self.status_label.setText(tr('Parámetros Briggs actualizados.'))
+        else:
+            self.stack_diameter_spin.setValue(previous[0])
+            self.exit_velocity_spin.setValue(previous[1])
+            self.stack_temperature_spin.setValue(previous[2])
+            self.ambient_temperature_spin.setValue(previous[3])
+            self.ambient_gradient_spin.setValue(previous[4])
+            self.stack_tip_downwash_combo.setCurrentIndex(previous[5])
 
     def algorithm_parameters(self):
         """Return safe prefilled parameters for the standard Processing dialog."""

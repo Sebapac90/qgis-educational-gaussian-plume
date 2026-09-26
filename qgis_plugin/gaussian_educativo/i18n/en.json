@@ -221,5 +221,9 @@
   "Modelo docente estacionario sobre terreno plano. Permite usar altura sin elevación, altura efectiva manual o elevación final de Briggs. En Briggs, cada clase de viento calcula su propia altura efectiva. No representa terreno, deposición, química, edificios ni elevación gradual de la pluma.": "Educational steady-state model over flat terrain. It supports no plume rise, a manually supplied effective height, or Briggs final plume rise. With Briggs, each wind class calculates its own effective height. It does not represent terrain, deposition, chemistry, buildings, or gradual plume rise.",
   "Altura: modo {}; elevación media {:.6g} m; altura efectiva media {:.6g} m": "Height: mode {}; mean plume rise {:.6g} m; mean effective height {:.6g} m",
   "Altura física de chimenea o efectiva manual (m)": "Physical stack height or manual effective height (m)",
-  "Altura efectiva:": "Effective height:"
+  "Altura efectiva:": "Effective height:",
+  "Configurar elevación Briggs": "Configure Briggs plume rise",
+  "Configurar Briggs…": "Configure Briggs…",
+  "Estos parámetros se usan solo con «Briggs calculado». La rapidez del viento y la clase de estabilidad se toman del panel principal. Para las clases E–F indique el gradiente vertical ambiente.": "These parameters are used only with Calculated Briggs rise. Wind speed and stability class come from the main panel. For classes E–F, provide the ambient vertical gradient.",
+  "Parámetros Briggs actualizados.": "Briggs parameters updated."
 }
