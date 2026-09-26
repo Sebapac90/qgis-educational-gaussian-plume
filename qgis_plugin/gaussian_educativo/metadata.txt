@@ -5,7 +5,7 @@ about=Educational, non-regulatory QGIS plugin implementing the classical steady-
     Students can select stability A-F, adjust wind speed from its measurement height, use constant, synthetic or CSV wind data, calculate final Briggs plume rise, and create georeferenced raster, isoline, source and wind-rose outputs.
     It does not model terrain effects, gradual plume rise, deposition, building downwash or atmospheric chemistry.
     The interface is available in Spanish and English. It uses NumPy, PyProj and Matplotlib from the QGIS Python environment.
-version=0.15.0
+version=0.15.1
 qgisMinimumVersion=3.40
 qgisMaximumVersion=3.99
 author=Sebastián Pacheco Mercado
@@ -20,5 +20,6 @@ deprecated=False
 server=False
 hasProcessingProvider=True
 tags=gaussian plume,air quality,education,atmospheric dispersion,wind rose
-changelog=0.15.0 - Adds optional Briggs final plume rise, manual effective height, per-wind-class height calculation and plume-height GeoTIFF metadata.
+changelog=0.15.1 - Refines the plume-rise interface: Briggs inputs open in a dedicated dialog; the ambient gradient is enabled only for stability classes E-F; and physical stack-height and entered effective-height inputs are kept separate.
+    0.15.0 - Adds optional Briggs final plume rise, manual effective height, per-wind-class height calculation and plume-height GeoTIFF metadata.
     0.14.0 - First public experimental release. Masters and Ela formulation, constant and observed wind modes, georeferenced outputs, bilingual interface and reproducible scenarios.

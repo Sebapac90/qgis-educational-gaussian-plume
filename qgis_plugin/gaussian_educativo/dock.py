@@ -17,7 +17,7 @@ from qgis.PyQt.QtWidgets import (QComboBox, QDialog, QDialogButtonBox,
     QDoubleSpinBox, QFileDialog,
     QFormLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit, QMessageBox,
     QProgressBar, QPushButton, QScrollArea, QSizePolicy, QTableWidget,
-    QTableWidgetItem, QVBoxLayout, QWidget)
+    QTableWidgetItem, QVBoxLayout, QWidget, QStackedWidget)
 from qgis.core import (QgsApplication, QgsCoordinateReferenceSystem,
     QgsCoordinateTransform, QgsPointXY, QgsProcessingAlgRunnerTask,
     QgsProcessingContext, QgsProcessingFeedback, QgsProject, QgsRasterLayer,
@@ -177,7 +177,7 @@ class BriggsParametersDialog(QDialog):
         self.setMinimumWidth(390)
         layout = QVBoxLayout(self)
         note = QLabel(tr(
-            'Estos parámetros se usan solo con «Briggs calculado». La rapidez '
+            'Estos parámetros se usan solo con «Elevación de la pluma». La rapidez '
             'del viento y la clase de estabilidad se toman del panel principal. '
             'Para las clases E–F indique el gradiente vertical ambiente.'))
         note.setWordWrap(True)
@@ -191,6 +191,7 @@ class BriggsParametersDialog(QDialog):
             26.85, -273.14, 1000.0, 2, " °C")
         self.ambient_gradient_spin = self._spin(
             2.0, -9.999999, 1000.0, 3, " °C/km")
+        self.ambient_gradient_label = QLabel(tr('Gradiente para E–F:'))
         self.stack_tip_downwash_combo = QComboBox()
         self.stack_tip_downwash_combo.addItems(
             [tr('Desactivado'), tr('Activado')])
@@ -198,7 +199,7 @@ class BriggsParametersDialog(QDialog):
         form.addRow(tr('Velocidad de salida:'), self.exit_velocity_spin)
         form.addRow(tr('Temperatura del gas:'), self.stack_temperature_spin)
         form.addRow(tr('Temperatura ambiente:'), self.ambient_temperature_spin)
-        form.addRow(tr('Gradiente para E–F:'), self.ambient_gradient_spin)
+        form.addRow(self.ambient_gradient_label, self.ambient_gradient_spin)
         form.addRow(tr('Descenso en la boca:'), self.stack_tip_downwash_combo)
         layout.addLayout(form)
         buttons = QDialogButtonBox(
@@ -206,6 +207,12 @@ class BriggsParametersDialog(QDialog):
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
+
+    def set_stability_class(self, stability_class):
+        """The ambient vertical gradient is only used for stable classes E–F."""
+        enabled = stability_class in ('E', 'F')
+        self.ambient_gradient_label.setEnabled(enabled)
+        self.ambient_gradient_spin.setEnabled(enabled)
 
     @staticmethod
     def _spin(value, minimum, maximum, decimals=3, suffix=""):
@@ -315,10 +322,18 @@ class GaussianDock(QgsDockWidget):
             ["kg/s", "g/s", "mg/s", "µg/s"], 1)
         emission_row.addWidget(self.emission_spin)
         emission_row.addWidget(self.emission_unit_combo)
-        self.height_spin = self._spin(50.0, 0.0, 100000.0, 2, " m")
+        self.stack_height_spin = self._spin(50.0, 0.0, 100000.0, 2, " m")
+        self.manual_effective_height_spin = self._spin(
+            50.0, 0.0, 100000.0, 2, " m")
+        # Kept as an alias for external code that sets the physical stack height.
+        self.height_spin = self.stack_height_spin
+        self.height_inputs = QStackedWidget()
+        self.height_inputs.addWidget(self.stack_height_spin)
+        self.height_inputs.addWidget(self.manual_effective_height_spin)
         self.height_mode_combo = self._combo([
-            tr('Sin elevación'), tr('Altura efectiva manual'),
-            tr('Briggs calculado')], 0)
+            tr('Altura de chimenea (sin elevación)'),
+            tr('Altura efectiva ingresada'),
+            tr('Elevación de la pluma')], 0)
         self.briggs_dialog = BriggsParametersDialog(self)
         self.stack_diameter_spin = self.briggs_dialog.stack_diameter_spin
         self.exit_velocity_spin = self.briggs_dialog.exit_velocity_spin
@@ -332,6 +347,8 @@ class GaussianDock(QgsDockWidget):
         self.height_mode_combo.currentIndexChanged.connect(
             self._sync_height_controls)
         self.stability_combo = self._combo(list("ABCDEF"), 3)
+        self.stability_combo.currentTextChanged.connect(
+            self._sync_briggs_stability)
         self.wind_reference_height_spin = self._spin(
             10.0, 0.01, 100000.0, 2, " m")
         self.wind_exposure_combo = self._combo([
@@ -340,7 +357,7 @@ class GaussianDock(QgsDockWidget):
         model_form.addRow(tr('Tratamiento de la altura:'),
                           self.height_mode_combo)
         self.height_label = QLabel()
-        model_form.addRow(self.height_label, self.height_spin)
+        model_form.addRow(self.height_label, self.height_inputs)
         model_form.addRow("", self.briggs_button)
         model_form.addRow(tr('Estabilidad:'), self.stability_combo)
         model_form.addRow(
@@ -349,6 +366,7 @@ class GaussianDock(QgsDockWidget):
         model_form.addRow(tr('Exposición:'), self.wind_exposure_combo)
         layout.addWidget(self._group(tr('Emisión y atmósfera'), model_form))
         self._sync_height_controls()
+        self._sync_briggs_stability()
 
         wind_form = QFormLayout()
         self.wind_mode_combo = self._combo([
@@ -562,10 +580,20 @@ class GaussianDock(QgsDockWidget):
     def _sync_height_controls(self):
         mode = self.height_mode_combo.currentIndex()
         briggs = mode == 2
+        self.height_inputs.setCurrentIndex(1 if mode == 1 else 0)
         self.height_label.setText(
-            tr('Altura efectiva:') if mode == 1 else
+            tr('Altura efectiva ingresada:') if mode == 1 else
             tr('Altura de la chimenea:'))
         self.briggs_button.setVisible(briggs)
+
+    def _active_height_spin(self, mode=None):
+        """Return the input whose physical meaning matches the selected mode."""
+        mode = self.height_mode_combo.currentIndex() if mode is None else mode
+        return self.manual_effective_height_spin if mode == 1 else self.stack_height_spin
+
+    def _sync_briggs_stability(self):
+        self.briggs_dialog.set_stability_class(
+            self.stability_combo.currentText())
 
     def configure_briggs(self):
         previous = (
@@ -596,7 +624,7 @@ class GaussianDock(QgsDockWidget):
             "WIND_MODE": self.wind_mode_combo.currentIndex(),
             "WIND_SPEED": self.wind_speed_spin.value(),
             "WIND_FROM": self.wind_from_spin.value(),
-            "EFFECTIVE_HEIGHT": self.height_spin.value(),
+            "EFFECTIVE_HEIGHT": self._active_height_spin().value(),
             "HEIGHT_MODE": self.height_mode_combo.currentIndex(),
             "STACK_DIAMETER": self.stack_diameter_spin.value(),
             "EXIT_VELOCITY": self.exit_velocity_spin.value(),
@@ -635,14 +663,14 @@ class GaussianDock(QgsDockWidget):
             raise ValueError(tr('Ingrese un nombre válido para el caso'))
         return safe
 
-    def _parameter_widgets(self):
+    def _parameter_widgets(self, height_mode=None):
         return {
             "EMISSION": self.emission_spin,
             "EMISSION_UNIT": self.emission_unit_combo,
             "WIND_MODE": self.wind_mode_combo,
             "WIND_SPEED": self.wind_speed_spin,
             "WIND_FROM": self.wind_from_spin,
-            "EFFECTIVE_HEIGHT": self.height_spin,
+            "EFFECTIVE_HEIGHT": self._active_height_spin(height_mode),
             "HEIGHT_MODE": self.height_mode_combo,
             "STACK_DIAMETER": self.stack_diameter_spin,
             "EXIT_VELOCITY": self.exit_velocity_spin,
@@ -678,7 +706,7 @@ class GaussianDock(QgsDockWidget):
             parameters["WIND_FILE"] = copied.name
         document = {
             "schema_version": 3,
-            "plugin_version": "0.15.0",
+            "plugin_version": "0.15.1",
             "algorithm": self.ALGORITHM_ID,
             "name": self.scenario_edit.text().strip(),
             "source_input": {
@@ -719,7 +747,8 @@ class GaussianDock(QgsDockWidget):
         parameters.setdefault("AMBIENT_TEMPERATURE_C", 26.85)
         parameters.setdefault("AMBIENT_GRADIENT_C_KM", 2.0)
         parameters.setdefault("STACK_TIP_DOWNWASH", 0)
-        for key, widget in self._parameter_widgets().items():
+        widgets = self._parameter_widgets(parameters["HEIGHT_MODE"])
+        for key, widget in widgets.items():
             value = parameters[key]
             if isinstance(widget, QComboBox):
                 if type(value) is not int or not 0 <= value < widget.count():
@@ -754,7 +783,8 @@ class GaussianDock(QgsDockWidget):
         crs = QgsCoordinateReferenceSystem()
         crs.createFromWkt(source["crs"])
         self.set_source(QgsPointXY(source["x"], source["y"]), crs)
-        for key, widget in self._parameter_widgets().items():
+        self.height_mode_combo.setCurrentIndex(parameters["HEIGHT_MODE"])
+        for key, widget in widgets.items():
             if isinstance(widget, QComboBox):
                 widget.setCurrentIndex(parameters[key])
             else:

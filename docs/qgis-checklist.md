@@ -163,7 +163,7 @@ un caso con ausentes.
   dentro del radio matemático de 16,586 m para D. Entre 20 y 100 m deben
   aplicarse directamente las ecuaciones 7.47–7.48, sin interpolación ni
   recorte.
-- [ ] **Elevación final Briggs:** seleccionar «Briggs calculado» y comprobar
+- [ ] **Elevación final Briggs:** seleccionar «Elevación de la pluma» y comprobar
   que aparezca el botón «Configurar Briggs…». Abrirlo y comprobar que contiene
   diámetro, velocidad de salida, temperaturas, gradiente y descenso en la boca.
   Usar chimenea 50 m, diámetro 2 m, salida 10 m/s, gas 126,85 °C, ambiente

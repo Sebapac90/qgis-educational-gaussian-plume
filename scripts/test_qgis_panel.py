@@ -96,7 +96,14 @@ def main():
         dock.wind_speed_spin.setValue(7.2)
         dock.wind_from_spin.setValue(225.0)
         dock.height_spin.setValue(80.0)
+        gradient_disabled_for_d = not dock.ambient_gradient_spin.isEnabled()
         dock.stability_combo.setCurrentIndex(5)
+        gradient_enabled_for_f = dock.ambient_gradient_spin.isEnabled()
+        dock.height_mode_combo.setCurrentIndex(1)
+        dock.manual_effective_height_spin.setValue(120.0)
+        separate_manual_height = (
+            dock.algorithm_parameters()['EFFECTIVE_HEIGHT'] == 120.0 and
+            dock.stack_height_spin.value() == 80.0)
         dock.width_spin.setValue(20000.0)
         dock.domain_height_spin.setValue(30000.0)
         dock.resolution_spin.setValue(100.0)
@@ -242,6 +249,9 @@ def main():
             "briggs_visible_in_mode": briggs_visible_in_mode,
             "briggs_dialog_configured": briggs_dialog_configured,
             "briggs_cancel_preserves_values": briggs_cancel_preserves_values,
+            "gradient_disabled_for_d": gradient_disabled_for_d,
+            "gradient_enabled_for_f": gradient_enabled_for_f,
+            "separate_manual_height": separate_manual_height,
         }
         checks = [
             "EPSG:4326" in report["original"],
@@ -281,6 +291,8 @@ def main():
             importer_passed,
             briggs_hidden_outside_mode, briggs_visible_in_mode,
             briggs_dialog_configured, briggs_cancel_preserves_values,
+            gradient_disabled_for_d, gradient_enabled_for_f,
+            separate_manual_height,
             report["direct_scenario"] == "Patache docente",
             report["direct_directory"] == "Patache_docente",
             direct_paths["OUTPUT"].endswith(
