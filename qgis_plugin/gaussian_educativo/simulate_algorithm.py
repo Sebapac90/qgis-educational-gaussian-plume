@@ -305,6 +305,7 @@ class SimulateGaussianPlumeAlgorithm(QgsProcessingAlgorithm):
             self._source_mode = self.parameterAsEnum(
                 parameters, self.SOURCE_MODE, context)
             self._prepared_source_rows = None
+            self._prepared_grid = None
             if self._source_mode == 0:
                 point = self.parameterAsPoint(parameters, self.SOURCE, context)
                 point_crs = self.parameterAsPointCrs(
@@ -407,22 +408,15 @@ class SimulateGaussianPlumeAlgorithm(QgsProcessingAlgorithm):
                             calculation_crs=first.crs))
                 self._prepared_source_rows = raw_rows
                 self._source = first
-        except (TypeError, ValueError) as error:
-            raise QgsProcessingException(str(error)) from None
-        return True
-
-    def processAlgorithm(self, parameters, context, feedback):
-        source = self._source
-        feedback.setProgress(5)
-        try:
             width = self.parameterAsDouble(parameters, self.WIDTH, context)
             height = self.parameterAsDouble(parameters, self.HEIGHT, context)
-            resolution = self.parameterAsDouble(parameters, self.RESOLUTION, context)
-            multi_source = self._prepared_source_rows is not None
+            resolution = self.parameterAsDouble(
+                parameters, self.RESOLUTION, context)
             source_locations = ([row["source"]
                                  for row in self._prepared_source_rows]
-                                if multi_source else [source])
-            if multi_source:
+                                if self._prepared_source_rows is not None
+                                else [self._source])
+            if self._prepared_source_rows is not None:
                 eastings = [item.easting_m for item in source_locations]
                 northings = [item.northing_m for item in source_locations]
                 if (max(eastings) - min(eastings) > width or
@@ -433,12 +427,26 @@ class SimulateGaussianPlumeAlgorithm(QgsProcessingAlgorithm):
                         'caben en el dominio de {:.0f} × {:.0f} m. Agrupe '
                         'fuentes cercanas o ejecute escenarios separados.'
                     ).format(width, height))
-            grid = (make_grid_for_sources(
-                        source_locations, width_m=width, height_m=height,
-                        resolution_m=resolution)
-                    if multi_source else
-                    make_grid(source, width_m=width, height_m=height,
-                              resolution_m=resolution))
+            self._prepared_grid = (make_grid_for_sources(
+                source_locations, width_m=width, height_m=height,
+                resolution_m=resolution)
+                if self._prepared_source_rows is not None else
+                make_grid(self._source, width_m=width, height_m=height,
+                          resolution_m=resolution))
+        except (TypeError, ValueError) as error:
+            raise QgsProcessingException(str(error)) from None
+        return True
+
+    def processAlgorithm(self, parameters, context, feedback):
+        source = self._source
+        feedback.setProgress(5)
+        try:
+            multi_source = self._prepared_source_rows is not None
+            source_locations = ([row["source"]
+                                 for row in self._prepared_source_rows]
+                                if multi_source else [source])
+            grid = self._prepared_grid
+            resolution = grid.resolution_m
             emission_index = self.parameterAsEnum(parameters, self.EMISSION_UNIT,
                                                    context)
             emission_unit = self.EMISSION_TOKENS[emission_index]

@@ -8,7 +8,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "qgis_plugin/gaussian_educativo"
 DIST = ROOT / "dist"
-VERSION = "0.16.6"
+VERSION = "0.16.7"
 ZIP_TIMESTAMP = (1980, 1, 1, 0, 0, 0)
 
 

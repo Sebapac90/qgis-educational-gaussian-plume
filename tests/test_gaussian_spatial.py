@@ -1,4 +1,6 @@
 import unittest
+from unittest.mock import patch
+from dataclasses import replace
 import numpy as np
 from pyproj import Geod, Transformer
 from gaussian_core import (gaussian_concentration,
@@ -183,6 +185,17 @@ class SpatialTests(unittest.TestCase):
         expected_north = (self.source.northing_m + second.northing_m) / 2
         self.assertAlmostEqual(grid.source.easting_m, expected_east, places=6)
         self.assertAlmostEqual(grid.source.northing_m, expected_north, places=6)
+
+    def test_multi_source_grid_reuses_prepared_crs_without_transforming(self):
+        second = replace(self.source,
+                         easting_m=self.source.easting_m + 1000,
+                         northing_m=self.source.northing_m + 500)
+        with patch("gaussian_spatial.Transformer.from_crs",
+                   side_effect=AssertionError("unexpected PROJ call")):
+            grid = make_grid_for_sources(
+                [self.source, second], width_m=2000, height_m=2000,
+                resolution_m=50)
+        self.assertIs(grid.source.crs, self.source.crs)
         west, south, east, north = grid.bounds
         for source in (self.source, second):
             self.assertTrue(west <= source.easting_m <= east)

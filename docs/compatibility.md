@@ -1,4 +1,4 @@
-# Compatibilidad e idiomas · versión estable 0.16.6 · 2026-10-01
+# Compatibilidad e idiomas · versión estable 0.16.7 · 2026-10-01
 
 ## Política de versiones
 
@@ -46,6 +46,30 @@ variables globales del sistema. `scripts/test_qgis_proj_isolation.py` simula
 una ruta externa, comprueba la restauración y crea CRS concurrentemente en ocho
 hilos. Pasó con QGIS 3.40.5/PROJ 8.1.1 y con la instalación exacta que falló,
 QGIS 3.44.14/PROJ 9.8.1.
+
+La prueba manual de 0.16.5 con tres fuentes y extensión automática reveló una
+segunda creación de CRS dentro del hilo agrupado de Procesos; macOS registró
+`EXC_BAD_ACCESS` en `proj_create`. Desde 0.16.7 la ubicación de las fuentes y
+la grilla inicial se preparan por completo en el hilo principal, y las
+ampliaciones reutilizan esos objetos sin abrir contextos PyProj. La regresión
+asíncrona del panel pasó con tres fuentes separadas, cuatro ampliaciones y un
+dominio final de 20 × 85 km en QGIS 3.44.14.
+
+La batería de estrés 0.16.7 repitió ese caso tres veces y añadió seis fuentes
+en estabilidad F, cuatro fuentes con Briggs en E, cinco fuentes con viento
+predominante y veinte fuentes con viento constante. Las siete tareas reales
+del panel terminaron, liberaron el hilo y produjeron sus tres capas sin avisos.
+Una matriz independiente comprobó 360 combinaciones de A–F, cinco direcciones,
+tres velocidades y 1, 3, 10 o 25 fuentes: todos los valores válidos fueron
+finitos y no negativos. También se verificaron el límite exacto de cuatro
+millones de celdas y el rechazo anticipado sobre 100 km o 50 millones de
+evaluaciones. Informes: `validation/qgis_multisource_stress_0167.json` y
+`validation/multisource_numerical_stress_0167.json`.
+
+El usuario instaló 0.16.7 y repitió el escenario de tres chimeneas con
+extensión automática que había cerrado QGIS en 0.16.5. La ejecución terminó
+sin problemas adicionales. Esta comprobación manual, junto con las baterías
+anteriores, cierra la corrección y acepta 0.16.7 como versión estable.
 
 La versión 0.10.0 añade al panel los modos predominante y aleatorio uniforme
 con los parámetros sintéticos reproducibles del notebook. El ZIP pasó panel,
@@ -156,7 +180,7 @@ humana de usabilidad ni comprueba los selectores nativos de macOS.
 
 ## Aceptación en QGIS 3.44 LTR
 
-1. Usar un perfil limpio e instalar el ZIP estable 0.16.6, sin paquetes adicionales.
+1. Usar un perfil limpio e instalar el ZIP estable 0.16.7, sin paquetes adicionales.
 2. Ejecutar la comprobación de dependencias y registrar el instalador exacto.
 3. Repetir Patache con fuente WGS84 y UTM; máximo 221.557028 µg/m³ y borde
    57.279337 µg/m³, tolerancia 0.001. Verificar zoom sobre mapa WGS84 y UTM.

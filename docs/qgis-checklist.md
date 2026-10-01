@@ -51,7 +51,7 @@ en Windows 10 con QGIS 3.44 LTR y completó sin incidencias el recorrido de
 instalación, cálculo constante y CSV, revisión de capas y CRS, simbología y
 reapertura del proyecto.
 
-Ensayo automático 0.16.0–0.16.6: el núcleo y el algoritmo admiten varias fuentes bajo
+Ensayo automático 0.16.0–0.16.7: el núcleo y el algoritmo admiten varias fuentes bajo
 una meteorología común. Dos fuentes coincidentes de 20 g/s reprodujeron el caso
 de una fuente de 40 g/s con diferencia máxima de 2,8 × 10⁻⁹ µg/m³ después de
 la transformación de coordenadas de QGIS. El GeoTIFF registró dos fuentes y la
@@ -59,6 +59,11 @@ capa vectorial de salida conservó dos entidades. El usuario aceptó el recorrid
 multifuente en macOS el 2026-10-01 y autorizó retirar la marca experimental en
 0.16.6. La repetición específica de multifuente en Windows queda como prueba
 adicional de compatibilidad.
+
+Confirmación manual 0.16.7, 2026-10-01: el usuario repitió con tres chimeneas
+el recorrido de extensión automática que había provocado un cierre nativo en
+0.16.5 y confirmó que terminó sin problemas adicionales. Se acepta la
+corrección de preparación del CRS y de la grilla fuera del hilo trabajador.
 
 Ensayo 0.12.0: el panel incorpora «Preparar CSV…». La prueba automática asigna
 columnas con nombres libres, fecha `DD/MM/AAAA HH:MM`, UTC, rumbos cardinales y
@@ -183,7 +188,7 @@ un caso con ausentes.
   `effective_height_m=81.556068...`. Guardar, cerrar y abrir el escenario; debe
   recuperar los parámetros. Abrir además un escenario 0.14.0 y confirmar que
   migre a «Sin elevación» con el mismo resultado anterior.
-- [x] **Multifuente 0.16.6:** preparar una fuente de 20 g/s en Patache y, al
+- [x] **Multifuente 0.16.6–0.16.7:** preparar una fuente de 20 g/s en Patache y, al
   final del panel, pulsar «Agregar multifuente…». Marcar un punto
   aproximadamente 1 km al este. Confirmar que el editor muestre dos fuentes en
   la lista: la primera debe conservar la fuente y parámetros actuales, y la

@@ -114,6 +114,38 @@ def main():
                 -21 < canvas.extent().yMinimum() < -20 and
                 -71 < canvas.extent().xMaximum() < -70 and
                 -21 < canvas.extent().yMaximum() < -20)
+            base_source = dock._current_source_row("Fuente 1")
+            dock.sources = [
+                dict(base_source),
+                dict(base_source, name="Fuente 2",
+                     longitude=-70.183195, latitude=-20.805320),
+                dict(base_source, name="Fuente 3",
+                     longitude=-70.153195, latitude=-20.805320),
+            ]
+            dock._update_source_count()
+            dock.domain_policy_combo.setCurrentIndex(1)
+            dock.scenario_edit.setText("Tres fuentes extendidas")
+            dock.start_execution()
+            multi_task = dock.active_task
+            if multi_task is None:
+                raise RuntimeError(
+                    "El panel no creó la tarea multifuente extendida")
+            multi_loop = QEventLoop()
+            multi_task.executed.connect(
+                lambda successful, results: multi_loop.quit())
+            QTimer.singleShot(30000, multi_loop.quit)
+            multi_loop.exec()
+            app.processEvents()
+            multi_target = Path(temp) / "Tres_fuentes_extendidas"
+            multi_files = {name: (multi_target / name).is_file() for name in
+                           ("concentracion.tif", "isolineas.gpkg",
+                            "fuente.gpkg")}
+            report["multi_source_automatic_extension"] = {
+                "files": multi_files,
+                "task_released": dock.active_task is None,
+                "status": dock.status_label.text(),
+            }
+            dock.clear_sources()
             dock.csv_edit.setText(str(
                 ROOT / "examples/synthetic_ne_sw_wind.csv"))
             dock.wind_mode_combo.setCurrentIndex(3)
@@ -144,6 +176,10 @@ def main():
             report["status"] = "passed" if (
                 all(files.values()) and report["group_created"] and
                 report["canvas_zoom_matches_crs"] and
+                all(report["multi_source_automatic_extension"]["files"].values()) and
+                report["multi_source_automatic_extension"]["task_released"] and
+                "completad" in
+                    report["multi_source_automatic_extension"]["status"].lower() and
                 report["cancellation"]["task_released"] and
                 "cancelado" in report["cancellation"]["status"].lower() and
                 cancel_record["execution"]["status"] == "canceled" and

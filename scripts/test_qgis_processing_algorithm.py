@@ -179,6 +179,34 @@ def main():
                 algorithm_id, auto_parameters,
                 feedback=QgsProcessingFeedback())
 
+            three_source_layer = QgsVectorLayer(
+                "Point?crs=EPSG:4326", "three separated sources", "memory")
+            three_source_provider = three_source_layer.dataProvider()
+            three_source_provider.addAttributes(multi_layer.fields())
+            three_source_layer.updateFields()
+            three_source_features = []
+            for name, longitude, latitude in (
+                    ("A", -70.193195, -20.805320),
+                    ("B", -70.183195, -20.805320),
+                    ("C", -70.153195, -20.805320)):
+                feature = QgsFeature(three_source_layer.fields())
+                feature.setGeometry(QgsGeometry.fromPointXY(
+                    QgsPointXY(longitude, latitude)))
+                feature.setAttributes([name, 20.0, 50.0])
+                three_source_features.append(feature)
+            three_source_provider.addFeatures(three_source_features)
+            multi_auto_parameters = dict(multi_parameters)
+            multi_auto_parameters.update({
+                "SOURCES": three_source_layer,
+                "DOMAIN_POLICY": 1,
+                "OUTPUT": "TEMPORARY_OUTPUT",
+                "ISOLINES": "TEMPORARY_OUTPUT",
+                "SOURCE_OUTPUT": "TEMPORARY_OUTPUT",
+            })
+            multi_auto_result = processing.run(
+                algorithm_id, multi_auto_parameters,
+                feedback=QgsProcessingFeedback())
+
             csv_paths = {
                 "OUTPUT": str(output_dir / "concentracion_viento_csv.tif"),
                 "ISOLINES": str(output_dir / "isolineas_viento_csv.gpkg"),
@@ -471,6 +499,13 @@ def main():
                 "project": str(auto_project_path),
                 "preview": str(auto_preview_path),
             },
+            "multi_source_automatic_extension": {
+                "status": multi_auto_result["DOMAIN_STATUS"],
+                "iterations": multi_auto_result["DOMAIN_ITERATIONS"],
+                "width_m": multi_auto_result["ACTUAL_WIDTH"],
+                "height_m": multi_auto_result["ACTUAL_HEIGHT"],
+                "maximum": multi_auto_result["MAXIMUM"],
+            },
             "wind_csv": {
                 "samples": csv_result["WIND_SAMPLES"],
                 "mean_speed_m_s": csv_result["MEAN_WIND_SPEED"],
@@ -586,6 +621,10 @@ def main():
                 result_report["maximum"]) < 1e-12,
             result_report["automatic_extension"]["border_maximum"] <
                 result_report["border_maximum"],
+            result_report["multi_source_automatic_extension"]["iterations"] > 0,
+            result_report["multi_source_automatic_extension"]["width_m"] >= 10000.0,
+            result_report["multi_source_automatic_extension"]["height_m"] > 10000.0,
+            result_report["multi_source_automatic_extension"]["maximum"] > 0,
             result_report["wind_csv"]["samples"] == 1200,
             abs(result_report["wind_csv"]["representative_from_deg"] -
                 44.82549413630073) < 1e-9,

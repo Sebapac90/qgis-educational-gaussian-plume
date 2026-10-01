@@ -495,7 +495,8 @@ def mean_ground_concentration_sources(
     if any(not isinstance(item, EmissionSource) for item in sources):
         raise TypeError("sources must contain EmissionSource objects")
     for item in sources:
-        if not item.source.crs.equals(grid.source.crs):
+        if (item.source.crs is not grid.source.crs and
+                not item.source.crs.equals(grid.source.crs)):
             raise ValueError("All sources and the grid must use the same calculation CRS")
         emission = _finite("emission_kg_s", item.emission_kg_s)
         if emission < 0:

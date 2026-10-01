@@ -5,7 +5,7 @@ about=Educational, non-regulatory QGIS plugin implementing the classical steady-
     Students can combine point sources, select stability A-F, adjust wind speed from its measurement height, use constant, synthetic or CSV wind data, calculate final Briggs plume rise, and create georeferenced raster, isoline, source and wind-rose outputs.
     It does not model terrain effects, gradual plume rise, deposition, building downwash or atmospheric chemistry.
     The interface is available in Spanish and English. It uses NumPy, PyProj and Matplotlib from the QGIS Python environment.
-version=0.16.6
+version=0.16.7
 qgisMinimumVersion=3.40
 qgisMaximumVersion=3.99
 author=Sebastián Pacheco Mercado
@@ -20,7 +20,8 @@ deprecated=False
 server=False
 hasProcessingProvider=True
 tags=gaussian plume,air quality,education,atmospheric dispersion,wind rose
-changelog=0.16.6 - Promotes the validated multiple-source release to stable status without changing the physical model or numerical results.
+changelog=0.16.7 - Prepares multi-source grids and CRS objects on the QGIS main thread, preventing native PROJ crashes during automatic domain extension in background tasks.
+    0.16.6 - Promotes the validated multiple-source release to stable status without changing the physical model or numerical results.
     0.16.5 - Simplifies the source-editor heading and reports clearly that multiple sources must fit one local domain with shared meteorology, recommending separate scenarios for distant source groups.
     0.16.4 - Binds pyproj to the PROJ database bundled with QGIS during plugin initialization, preventing foreign Conda or GIS environment paths from reaching background Processing calculations while restoring the process environment immediately.
     0.16.3 - Opens the source editor on the newly mapped source and commits pending numeric edits before switching sources, so per-stack Briggs diameter, exit velocity and gas temperature are preserved.

@@ -202,7 +202,9 @@ def make_grid_for_sources(sources, *, width_m, height_m, resolution_m):
     if any(not isinstance(source, Source) for source in sources):
         raise TypeError("sources must contain Source objects")
     calculation_crs = sources[0].crs
-    if any(not source.crs.equals(calculation_crs) for source in sources[1:]):
+    if any(source.crs is not calculation_crs and
+           not source.crs.equals(calculation_crs)
+           for source in sources[1:]):
         raise ValueError("All sources must use the same calculation CRS")
     width = finite_scalar("width_m", width_m)
     height = finite_scalar("height_m", height_m)
@@ -213,10 +215,13 @@ def make_grid_for_sources(sources, *, width_m, height_m, resolution_m):
     if (eastings.max() - eastings.min() > width or
             northings.max() - northings.min() > height):
         raise ValueError("The selected domain is too small to contain all sources")
-    lon, lat = Transformer.from_crs(
-        calculation_crs, 4326, always_xy=True).transform(
-            centre_east, centre_north, errcheck=True)
-    reference = locate_source(lon, lat, calculation_crs=calculation_crs)
+    # The grid reference only supplies the projected centre, CRS and bounds.
+    # Reusing the first immutable source avoids opening a new PROJ context.
+    # This matters in QGIS, whose macOS bundle can crash if a pooled Processing
+    # worker initializes a PyProj CRS. Individual sources retain their own
+    # longitude, latitude and meridian convergence for concentration fields.
+    reference = replace(sources[0], easting_m=centre_east,
+                        northing_m=centre_north)
     grid = make_grid(reference, width_m=width, height_m=height,
                      resolution_m=resolution_m)
     west, south, east, north = grid.bounds
@@ -285,7 +290,8 @@ def ground_concentration(grid, *, wind_from_deg, emission_kg_s,
     source = grid.source if source is None else source
     if not isinstance(source, Source):
         raise TypeError("source must be a Source object")
-    if not source.crs.equals(grid.source.crs):
+    if (source.crs is not grid.source.crs and
+            not source.crs.equals(grid.source.crs)):
         raise ValueError("Source and grid must use the same calculation CRS")
     grid_angle = (finite_scalar("wind_from_deg", wind_from_deg) -
                   source.convergence_deg)
