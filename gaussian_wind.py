@@ -21,9 +21,9 @@ except ImportError:  # standalone notebooks and scripts
                                masters_2008_wind_speed_at_height)
 
 try:  # package form used by the built QGIS plugin
-    from .gaussian_spatial import ground_concentration
+    from .gaussian_spatial import Source, ground_concentration
 except ImportError:  # standalone notebooks and scripts
-    from gaussian_spatial import ground_concentration
+    from gaussian_spatial import Source, ground_concentration
 
 
 WIND_MODES = ("constant", "fluctuating", "prevailing", "table")
@@ -101,6 +101,17 @@ class BriggsStackParameters:
     ambient_temperature_k: float
     ambient_temperature_gradient_k_m: Optional[float] = None
     stack_tip_downwash: bool = False
+
+
+@dataclass(frozen=True)
+class EmissionSource:
+    """One independently parameterised source in a shared wind episode."""
+
+    source: Source
+    emission_kg_s: float
+    effective_height_m: Optional[float] = None
+    briggs_stack: Optional[BriggsStackParameters] = None
+    name: str = ""
 
 
 @dataclass(frozen=True)
@@ -351,7 +362,8 @@ def mean_ground_concentration(grid, wind, *, emission_kg_s,
                               direction_sectors=CALCULATION_DIRECTION_SECTORS,
                               wind_reference_height_m=None,
                               wind_exposure="rough", briggs_stack=None,
-                              return_height_summary=False):
+                              return_height_summary=False, source=None,
+                              mask_near_source=True):
     """Return the weighted mean of stationary fields.
 
     With ``briggs_stack``, each calculation wind class obtains its own wind at
@@ -434,15 +446,17 @@ def mean_ground_concentration(grid, wind, *, emission_kg_s,
             emission_kg_s=emission_kg_s,
             wind_speed_m_s=model_speed,
             effective_height_m=height, stability=stability,
-            mask_near_source=False)
+            mask_near_source=False, source=source)
         if progress_callback is not None:
             progress_callback(index / calculation_wind.samples)
     minimum_x = masters_2008_minimum_positive_x_m(stability)
     east, north = np.meshgrid(grid.east_centres_m,
                               grid.north_centres_m)
-    radius = np.hypot(east - grid.source.easting_m,
-                      north - grid.source.northing_m)
-    total[radius <= minimum_x] = np.nan
+    evaluated_source = grid.source if source is None else source
+    if mask_near_source:
+        radius = np.hypot(east - evaluated_source.easting_m,
+                          north - evaluated_source.northing_m)
+        total[radius <= minimum_x] = np.nan
     if not return_height_summary:
         return total
     rises = np.asarray(rises, dtype=float)
@@ -461,6 +475,85 @@ def mean_ground_concentration(grid, wind, *, emission_kg_s,
         momentum_weight=float(momentum_weight),
     )
     return total, summary
+
+
+def mean_ground_concentration_sources(
+        grid, wind, sources, *, stability, max_evaluations=None,
+        progress_callback=None, is_canceled=None,
+        direction_sectors=CALCULATION_DIRECTION_SECTORS,
+        wind_reference_height_m=None, wind_exposure="rough",
+        return_height_summaries=False):
+    """Sum independent source fields under one shared wind episode.
+
+    Gaussian concentration is linear in emission rate, so the total field is
+    the direct superposition of every source field.  Near-field exclusions are
+    applied as the union of the source-specific Masters equation limits.
+    """
+    sources = tuple(sources)
+    if not sources:
+        raise ValueError("At least one emission source is required")
+    if any(not isinstance(item, EmissionSource) for item in sources):
+        raise TypeError("sources must contain EmissionSource objects")
+    for item in sources:
+        if not item.source.crs.equals(grid.source.crs):
+            raise ValueError("All sources and the grid must use the same calculation CRS")
+        emission = _finite("emission_kg_s", item.emission_kg_s)
+        if emission < 0:
+            raise ValueError("emission_kg_s must be nonnegative")
+        if ((item.effective_height_m is None) ==
+                (item.briggs_stack is None)):
+            raise ValueError(
+                "Each source requires exactly one fixed height or Briggs stack")
+    use_briggs = any(item.briggs_stack is not None for item in sources)
+    calculation_wind = (wind if direction_sectors is None else
+                        aggregate_wind_for_calculation(
+                            wind, direction_sectors=direction_sectors,
+                            speed_class_edges_m_s=(
+                                BRIGGS_CALCULATION_SPEED_CLASS_EDGES_M_S
+                                if use_briggs else SPEED_CLASS_EDGES_M_S)))
+    evaluations = (int(np.prod(grid.shape)) * calculation_wind.samples *
+                   len(sources))
+    if max_evaluations is not None and evaluations > max_evaluations:
+        recommended = grid.resolution_m * math.sqrt(
+            evaluations / max_evaluations)
+        raise ValueError(
+            "Multi-source wind averaging would evaluate {:,} cell-classes; "
+            "the interactive limit is {:,}. Increase resolution to at least "
+            "{:.0f} m or reduce the domain or source count.".format(
+                evaluations, max_evaluations, math.ceil(recommended)))
+    total = np.zeros(grid.shape, dtype=float)
+    summaries = []
+    source_count = len(sources)
+    for index, item in enumerate(sources):
+        if is_canceled is not None and is_canceled():
+            raise InterruptedError("Multi-source wind averaging canceled")
+        def source_progress(fraction, index=index):
+            if progress_callback is not None:
+                progress_callback((index + fraction) / source_count)
+        field, summary = mean_ground_concentration(
+            grid, calculation_wind,
+            emission_kg_s=item.emission_kg_s,
+            effective_height_m=item.effective_height_m,
+            stability=stability, max_evaluations=None,
+            progress_callback=source_progress, is_canceled=is_canceled,
+            direction_sectors=None,
+            wind_reference_height_m=wind_reference_height_m,
+            wind_exposure=wind_exposure, briggs_stack=item.briggs_stack,
+            return_height_summary=True, source=item.source,
+            mask_near_source=False)
+        total += field
+        summaries.append(summary)
+    minimum_x = masters_2008_minimum_positive_x_m(stability)
+    east, north = np.meshgrid(grid.east_centres_m,
+                              grid.north_centres_m)
+    invalid = np.zeros(grid.shape, dtype=bool)
+    for item in sources:
+        invalid |= np.hypot(east - item.source.easting_m,
+                            north - item.source.northing_m) <= minimum_x
+    total[invalid] = np.nan
+    if return_height_summaries:
+        return total, tuple(summaries)
+    return total
 
 
 def save_wind_rose(wind, output_path, *, language="es"):

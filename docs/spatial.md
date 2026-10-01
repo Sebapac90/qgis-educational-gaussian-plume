@@ -321,7 +321,7 @@ establecer la versión mínima histórica compatible. Rasterio declara attrs
 como dependencia. Todos los paquetes instalados satisfacen los rangos de
 `requirements-spatial.txt`, incluidos sus archivos referenciados.
 
-`scripts/validate.py`: **60 pruebas, cero errores y cero fallos**. Verificó
+`scripts/validate.py`: **84 pruebas, cero errores y cero fallos**. Verificó
 las ecuaciones publicadas, el núcleo, las transformaciones espaciales y las salidas.
 `validation/summary.json` registra la ejecución reproducible. Los informes detallados
 de la instalación local de QGIS se conservan fuera del repositorio público.

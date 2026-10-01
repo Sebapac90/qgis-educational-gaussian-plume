@@ -8,13 +8,18 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "qgis_plugin/gaussian_educativo"
 DIST = ROOT / "dist"
-VERSION = "0.15.1"
+VERSION = "0.16.5"
 ZIP_TIMESTAMP = (1980, 1, 1, 0, 0, 0)
 
 
 def main():
     DIST.mkdir(exist_ok=True)
     archive = DIST / "gaussian_educativo-{}.zip".format(VERSION)
+    manifest_path = DIST / "gaussian_educativo-{}.json".format(VERSION)
+    if archive.exists() or manifest_path.exists():
+        raise FileExistsError(
+            "Version {} already exists in dist; bump VERSION instead of "
+            "overwriting a published build".format(VERSION))
     files = []
     for path in SOURCE.rglob("*"):
         relative = path.relative_to(SOURCE)
@@ -36,7 +41,7 @@ def main():
     manifest = {"plugin": "gaussian_educativo", "version": VERSION,
                 "archive": str(archive), "sha256": digest,
                 "files": len(files)}
-    (DIST / "gaussian_educativo-{}.json".format(VERSION)).write_text(
+    manifest_path.write_text(
         json.dumps(manifest, indent=2) + "\n")
     print(json.dumps(manifest, indent=2))
     return archive

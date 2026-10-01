@@ -72,7 +72,8 @@ def main():
         interface = FakeInterface(canvas, window)
 
         from gaussian_educativo.plugin import GaussianEducationalPlugin
-        from gaussian_educativo.dock import WindCsvImportDialog
+        from gaussian_educativo.dock import (SourceTableDialog,
+                                             WindCsvImportDialog)
         plugin = GaussianEducationalPlugin(interface)
         plugin.initGui()
         dock = plugin.dock
@@ -217,6 +218,117 @@ def main():
                 tamper_rejected = False
             except ValueError:
                 tamper_rejected = True
+            dock.clear_sources()
+            dock.set_source(QgsPointXY(-70.193195, -20.805320), wgs84)
+            dock.emission_spin.setValue(20.0)
+            dialog_checks = {}
+
+            def accept_multiple_dialog(dialog):
+                dialog.show()
+                app.processEvents()
+                dialog.grab().save(str(
+                    ROOT / "validation/multisource_editor_0165.png"))
+                dialog.hide()
+                dialog_checks["rows"] = dialog.source_list.count() == 2
+                dialog_checks["new_source_selected"] = (
+                    dialog.source_list.currentRow() == 1 and
+                    abs(dialog.longitude_spin.value() + 70.183195) < 1e-8)
+                dialog_checks["source_editor_layout"] = (
+                    dialog.source_list.minimumWidth() == 190 and
+                    not dialog.briggs_group.isHidden())
+                dialog.source_list.setCurrentRow(0)
+                dialog_checks["first_coordinate"] = (
+                    abs(dialog.longitude_spin.value() + 70.193195) < 1e-8)
+                first_emission = dialog.emission_spin.value()
+                dialog.source_list.setCurrentRow(1)
+                dialog_checks["second_coordinate"] = (
+                    abs(dialog.longitude_spin.value() + 70.183195) < 1e-8)
+                dialog_checks["copied_emission"] = (
+                    first_emission == 20.0 and
+                    dialog.emission_spin.value() == 20.0)
+                dialog_checks["wind_summary"] = (
+                    bool(dialog.wind_summary_label.text()) and
+                    'F' in dialog.wind_summary_label.text())
+                dialog.emission_spin.setValue(10.0)
+                dialog.diameter_spin.lineEdit().setText("3.500 m")
+                dialog.exit_velocity_spin.lineEdit().setText("14.000 m/s")
+                dialog.temperature_spin.lineEdit().setText("180.00 °C")
+                dialog._request_wind_edit()
+                dialog_checks["wind_edit_requested"] = (
+                    dialog.edit_wind_requested)
+                return QDialog.Accepted
+
+            with patch.object(SourceTableDialog, "exec",
+                              new=accept_multiple_dialog):
+                dock.configure_multiple_sources()
+                capture_armed = dock.pending_multiple_capture
+                dock._canvas_clicked(
+                    QgsPointXY(-70.183195, -20.805320), None)
+            first_source_remains_current = (
+                abs(dock.wgs84_point.x() + 70.193195) < 1e-12)
+            multi_parameters = dock.algorithm_parameters()
+            multi_source_layer = multi_parameters["SOURCES"]
+            wind_edit_flow = (
+                'Modifica el viento común' in dock.status_label.text() and
+                dock.sources[1]['diameter_m'] == 3.5 and
+                dock.sources[1]['exit_velocity_m_s'] == 14.0 and
+                dock.sources[1]['temperature_c'] == 180.0)
+            multi_scenario = Path(temporary) / "multifuente.json"
+            expected_sources = [dict(row) for row in dock.sources]
+            dock.save_scenario(multi_scenario)
+            dock.clear_sources()
+            dock.load_scenario(multi_scenario)
+            multi_panel = (
+                multi_parameters["SOURCE_MODE"] == 1 and
+                multi_source_layer.featureCount() == 2 and
+                multi_parameters["SOURCE_EMISSION_FIELD"] == "emission" and
+                dock.sources == expected_sources and capture_armed and
+                first_source_remains_current and all(dialog_checks.values()))
+            third_checks = {}
+
+            def accept_third_dialog(dialog):
+                third_checks["rows"] = dialog.source_list.count() == 3
+                third_checks["new_source_selected"] = (
+                    dialog.source_list.currentRow() == 2)
+                third_checks["coordinate"] = (
+                    abs(dialog.longitude_spin.value() + 70.173195) < 1e-8)
+                third_checks["copied_last_emission"] = (
+                    dialog.emission_spin.value() == 10.0)
+                third_checks["copied_last_briggs"] = (
+                    dialog.diameter_spin.value() == 3.5 and
+                    dialog.exit_velocity_spin.value() == 14.0 and
+                    dialog.temperature_spin.value() == 180.0)
+                dialog._validate_and_accept()
+                return QDialog.Accepted
+
+            add_more_visible = not dock.add_more_source_button.isHidden()
+            with patch.object(SourceTableDialog, "exec",
+                              new=accept_third_dialog):
+                dock.add_another_source_from_map()
+                additional_capture_armed = dock.pending_multiple_capture
+                dock._canvas_clicked(
+                    QgsPointXY(-70.173195, -20.805320), None)
+            third_source_flow = (
+                add_more_visible and additional_capture_armed and
+                len(dock.sources) == 3 and all(third_checks.values()))
+            dock.load_scenario(multi_scenario)
+            local_sources = [dict(row) for row in dock.sources]
+            distant_source = dict(local_sources[-1])
+            distant_source.update({
+                'name': 'Nairobi', 'longitude': 36.8219,
+                'latitude': -1.2921})
+            dock.sources = local_sources + [distant_source]
+            dock._invalidate_source_layer()
+            try:
+                dock.algorithm_parameters()
+                distant_source_panel_rejected = False
+            except ValueError as error:
+                distant_source_panel_rejected = (
+                    'único dominio local' in str(error) and
+                    'escenarios separados' in str(error))
+            dock.sources = local_sources
+            dock._invalidate_source_layer()
+            dock.set_source(QgsPointXY(-70.193195, -20.805320), wgs84)
 
         report = {
             "status": "passed",
@@ -252,6 +364,15 @@ def main():
             "gradient_disabled_for_d": gradient_disabled_for_d,
             "gradient_enabled_for_f": gradient_enabled_for_f,
             "separate_manual_height": separate_manual_height,
+            "multi_source_panel_and_scenario": multi_panel,
+            "multi_source_editor_checks": dialog_checks,
+            "multi_source_capture_armed": capture_armed,
+            "multi_source_first_remains_current": first_source_remains_current,
+            "multi_source_scenario_roundtrip": dock.sources == expected_sources,
+            "multi_source_wind_edit_flow": wind_edit_flow,
+            "third_source_editor_checks": third_checks,
+            "third_source_map_flow": third_source_flow,
+            "distant_source_panel_rejected": distant_source_panel_rejected,
         }
         checks = [
             "EPSG:4326" in report["original"],
@@ -293,6 +414,10 @@ def main():
             briggs_dialog_configured, briggs_cancel_preserves_values,
             gradient_disabled_for_d, gradient_enabled_for_f,
             separate_manual_height,
+            multi_panel,
+            wind_edit_flow,
+            third_source_flow,
+            distant_source_panel_rejected,
             report["direct_scenario"] == "Patache docente",
             report["direct_directory"] == "Patache_docente",
             direct_paths["OUTPUT"].endswith(

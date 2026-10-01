@@ -109,6 +109,32 @@ Cada condición meteorológica genera un campo estacionario. El resultado se obt
 C_media(E,N) = Σ wᵢ C(E,N; direcciónᵢ, rapidezᵢ),  con  Σwᵢ = 1
 ```
 
+## Superposición de fuentes
+
+Para varias fuentes puntuales independientes sometidas al mismo episodio
+meteorológico, la linealidad de la ecuación respecto de la tasa de emisión
+permite sumar directamente sus campos:
+
+```text
+C_total(E,N) = Σⱼ Cⱼ(E,N; Qⱼ, Hⱼ)
+```
+
+Cada fuente conserva ubicación, emisión y altura. En el modo Briggs puede
+tener además diámetro, velocidad de salida y temperatura del gas propios. La
+clase de estabilidad, la serie de viento, la exposición, la temperatura
+ambiente y el gradiente vertical pertenecen al escenario y se comparten.
+
+La grilla se centra en el centro de la envolvente de las fuentes; su ancho y
+alto son las dimensiones finales solicitadas. Todas las fuentes deben quedar
+dentro del dominio y usar el mismo CRS WGS84 UTM/UPS de cálculo. El límite
+interactivo se evalúa como número de celdas por clases meteorológicas por
+número de fuentes.
+
+Las raíces matemáticas de `σz` para D–F se aplican alrededor de cada fuente.
+La unión de esas vecindades se escribe como NoData, porque el modelo adoptado
+no define de forma válida el aporte local de esa fuente. Fuera de ellas se
+suman todos los aportes sin suavizado ni corrección adicional.
+
 La suma o media ponderada de concentraciones por frecuencias meteorológicas es una operación general de los modelos de dispersión climatológicos. La documentación histórica de EPA describe el promedio de resultados horarios y la ponderación por frecuencia relativa de cada combinación meteorológica: [AERMOD User's Guide](https://gaftp.epa.gov/aqmg/SCRAM/models/preferred/aermod/aermod_userguide.pdf) y [evaluación de modelos gaussianos de EPA](https://nepis.epa.gov/Exe/ZyPURL.cgi?Dockey=20015UWM.txt).
 
 Para tablas largas, el cálculo agrupa primero en 72 sectores direccionales de 5° y siete clases de rapidez. Dentro de cada clase conserva el peso total, usa media circular ponderada para la dirección y media armónica ponderada para la rapidez, porque la concentración es proporcional a `1/u`. La rosa de vientos conserva 16 sectores para una lectura clara.
@@ -120,12 +146,14 @@ Las calmas y direcciones variables se muestran separadas en la rosa. El campo de
 ## Supuestos y límites
 
 - terreno plano y viento uniforme en cada cálculo estacionario;
-- una fuente puntual continua;
+- una o varias fuentes puntuales continuas e independientes;
 - estabilidad A–F fija por escenario;
 - reflexión perfecta en el suelo;
 - sin elevación gradual de pluma, deposición, química, edificios ni terreno;
 - sin autocorrelación temporal ni ráfagas;
 - dominio local máximo de 100 km por lado;
+- las fuentes de una simulación multifuente deben pertenecer al mismo dominio
+  local; grupos distantes se calculan como escenarios separados;
 - resultados educativos, sin validez regulatoria declarada.
 
 La política predeterminada conserva el dominio solicitado y reporta los máximos de cada borde. Se considera que un lado necesita revisión si alcanza 0,1 µg/m³ o 1 % del máximo del campo. La opción de extensión duplica solo los márgenes que no cumplen, hasta los límites de tamaño, celdas e iteraciones. Cumplir esos umbrales indica contención numérica de la visualización; no demuestra validez física a grandes distancias.
@@ -134,4 +162,8 @@ La política predeterminada conserva el dominio solicitado y reporta los máximo
 
 `tests/test_masters_2008.py` contrasta ecuaciones 7.46–7.48 y tablas 7.8–7.9. Las demás pruebas cubren simetría, escala con emisión y viento, reflexión, unidades, CRS, orientación, ráster, isolíneas, importación meteorológica y agrupación.
 
-La validación actual ejecuta 60 pruebas en el entorno `gee` y seis casos de centro de pluma con cálculo analítico independiente a 1 km. El acuerdo numérico verifica la implementación de las ecuaciones y el software; no constituye validación de campo.
+La validación actual ejecuta 84 pruebas en el entorno `gee`, incluidas pruebas
+de superposición coincidente y separada, además de seis casos de centro de
+pluma con cálculo analítico independiente a 1 km. El acuerdo numérico verifica
+la implementación de las ecuaciones y el software; no constituye validación de
+campo.

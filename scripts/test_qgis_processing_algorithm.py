@@ -21,12 +21,13 @@ def main():
     contents = configure_macos_qgis_bundle()
     os.environ["QGIS_CUSTOM_CONFIG_PATH"] = str(
         Path(tempfile.gettempdir()) / "gaussian-qgis-processing-profile")
-    from qgis.PyQt.QtCore import QSize
+    from qgis.PyQt.QtCore import QSize, QMetaType
     from qgis.PyQt.QtGui import QColor
     from osgeo import gdal
-    from qgis.core import (QgsApplication, QgsMapRendererParallelJob,
+    from qgis.core import (QgsApplication, QgsFeature, QgsField, QgsGeometry,
+                           QgsMapRendererParallelJob,
                            QgsMapSettings, QgsProcessingException,
-                           QgsProcessingFeedback, QgsProject,
+                           QgsProcessingFeedback, QgsProject, QgsPointXY,
                            QgsRasterLayer, QgsVectorLayer)
 
     prefix = contents / "MacOS" if contents else Path(os.environ["QGIS_PREFIX_PATH"])
@@ -81,6 +82,66 @@ def main():
                 "SOURCE_OUTPUT": source_output,
             }
             result = processing.run(algorithm_id, parameters, feedback=feedback)
+
+            multi_layer = QgsVectorLayer(
+                "Point?crs=EPSG:4326", "two sources", "memory")
+            multi_provider = multi_layer.dataProvider()
+            multi_provider.addAttributes([
+                QgsField("name", QMetaType.Type.QString),
+                QgsField("emission", QMetaType.Type.Double),
+                QgsField("height_m", QMetaType.Type.Double)])
+            multi_layer.updateFields()
+            multi_features = []
+            for name in ("A", "B"):
+                feature = QgsFeature(multi_layer.fields())
+                feature.setGeometry(QgsGeometry.fromPointXY(
+                    QgsPointXY(-70.193195, -20.805320)))
+                feature.setAttributes([name, 20.0, 50.0])
+                multi_features.append(feature)
+            multi_provider.addFeatures(multi_features)
+            multi_parameters = dict(parameters)
+            multi_parameters.update({
+                "SOURCE_MODE": 1, "SOURCES": multi_layer,
+                "SOURCE_NAME_FIELD": "name",
+                "SOURCE_EMISSION_FIELD": "emission",
+                "SOURCE_HEIGHT_FIELD": "height_m",
+                "OUTPUT": "TEMPORARY_OUTPUT",
+                "ISOLINES": "TEMPORARY_OUTPUT",
+                "SOURCE_OUTPUT": "TEMPORARY_OUTPUT",
+            })
+            multi_result = processing.run(
+                algorithm_id, multi_parameters,
+                feedback=QgsProcessingFeedback())
+
+            distant_layer = QgsVectorLayer(
+                "Point?crs=EPSG:4326", "distant sources", "memory")
+            distant_provider = distant_layer.dataProvider()
+            distant_provider.addAttributes(multi_layer.fields())
+            distant_layer.updateFields()
+            distant_features = []
+            for name, longitude, latitude in (
+                    ("Patache", -70.193195, -20.805320),
+                    ("Nairobi", 36.8219, -1.2921)):
+                feature = QgsFeature(distant_layer.fields())
+                feature.setGeometry(QgsGeometry.fromPointXY(
+                    QgsPointXY(longitude, latitude)))
+                feature.setAttributes([name, 20.0, 50.0])
+                distant_features.append(feature)
+            distant_provider.addFeatures(distant_features)
+            distant_parameters = dict(multi_parameters)
+            distant_parameters["SOURCES"] = distant_layer
+            distant_feedback = QgsProcessingFeedback()
+            try:
+                processing.run(algorithm_id, distant_parameters,
+                               feedback=distant_feedback)
+                distant_sources_rejected = False
+                distant_sources_error = ""
+            except QgsProcessingException as error:
+                distant_sources_error = (str(error) + "\n" +
+                                          distant_feedback.textLog())
+                distant_sources_rejected = (
+                    "único dominio local" in distant_sources_error and
+                    "escenarios separados" in distant_sources_error)
 
             masters_paths = {
                 "OUTPUT": str(output_dir / "concentracion_masters.tif"),
@@ -322,6 +383,19 @@ def main():
         if not csv_render.renderedImage().save(str(csv_preview_path)):
             raise RuntimeError("QGIS could not write the wind CSV preview")
         csv_metadata = gdal.Open(csv_result["OUTPUT"]).GetMetadata()
+        multi_dataset = gdal.Open(multi_result["OUTPUT"])
+        multi_metadata = multi_dataset.GetMetadata()
+        multi_values = multi_dataset.GetRasterBand(1).ReadAsArray()
+        single_clean = np.where(values == band.GetNoDataValue(), np.nan, values)
+        multi_clean = np.where(
+            multi_values == multi_dataset.GetRasterBand(1).GetNoDataValue(),
+            np.nan, multi_values)
+        multi_max_abs_difference = float(np.nanmax(
+            np.abs(single_clean - multi_clean)))
+        multi_source_layer = multi_result["SOURCE_OUTPUT"]
+        if not isinstance(multi_source_layer, QgsVectorLayer):
+            multi_source_layer = QgsVectorLayer(
+                multi_source_layer, "multi source", "ogr")
         result_report = {
             "status": "passed",
             "algorithm": algorithm_id,
@@ -346,6 +420,15 @@ def main():
             "source_crs": fixed_layer_report["source_crs"],
             "source_feature_count": fixed_layer_report["source_feature_count"],
             "source_easting_northing": [source_point.x(), source_point.y()],
+            "multi_source": {
+                "feature_count": multi_source_layer.featureCount(),
+                "source_count_metadata": multi_metadata.get("source_count"),
+                "maximum": multi_result["MAXIMUM"],
+                "max_abs_difference": multi_max_abs_difference,
+                "same_as_single": multi_max_abs_difference < 1e-8,
+                "distant_sources_rejected": distant_sources_rejected,
+                "distant_sources_error": distant_sources_error,
+            },
             "styles": fixed_layer_report["styles"],
             "project": str(project_path),
             "preview": str(preview_path),
@@ -458,6 +541,12 @@ def main():
             result_report["isoline_feature_count"] >= len(levels),
             result_report["source_crs"] == "EPSG:32719",
             result_report["source_feature_count"] == 1,
+            result_report["multi_source"]["feature_count"] == 2,
+            result_report["multi_source"]["source_count_metadata"] == "2",
+            abs(result_report["multi_source"]["maximum"] -
+                result_report["maximum"]) < 1e-8,
+            result_report["multi_source"]["same_as_single"],
+            result_report["multi_source"]["distant_sources_rejected"],
             abs(result_report["source_easting_northing"][0] - 375825.81901894213) < 1e-6,
             abs(result_report["source_easting_northing"][1] - 7698938.582415143) < 1e-6,
             result_report["styles"] == {

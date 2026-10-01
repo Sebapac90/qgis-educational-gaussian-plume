@@ -5,13 +5,16 @@ from pathlib import Path
 import numpy as np
 
 from gaussian_core import (briggs_final_plume_rise,
+                           masters_2008_minimum_positive_x_m,
                            masters_2008_wind_speed_at_height)
-from gaussian_spatial import ground_concentration, locate_source, make_grid
-from gaussian_wind import (BriggsStackParameters,
+from gaussian_spatial import (ground_concentration, locate_source, make_grid,
+                              make_grid_for_sources)
+from gaussian_wind import (BriggsStackParameters, EmissionSource,
                            CALCULATION_DIRECTION_SECTORS,
                            ROSE_DIRECTION_SECTORS, WindSeries,
                            aggregate_wind_for_calculation,
-                           mean_ground_concentration, save_wind_rose,
+                           mean_ground_concentration,
+                           mean_ground_concentration_sources, save_wind_rose,
                            wind_from_config, wind_observation_frequencies)
 
 
@@ -335,6 +338,114 @@ class WindTests(unittest.TestCase):
         northeast = abs((wind.directions_from_deg - 45 + 180) % 360 - 180)
         southwest = abs((wind.directions_from_deg - 225 + 180) % 360 - 180)
         self.assertEqual(int(np.count_nonzero(northeast < southwest)), 1104)
+
+    def test_two_colocated_half_emissions_equal_one_full_emission(self):
+        wind = wind_from_config(self.model)
+        source = self.grid.source
+        combined = mean_ground_concentration_sources(
+            self.grid, wind,
+            [EmissionSource(source, .02, effective_height_m=50,
+                            name="A"),
+             EmissionSource(source, .02, effective_height_m=50,
+                            name="B")],
+            stability="D")
+        single = mean_ground_concentration(
+            self.grid, wind, emission_kg_s=.04,
+            effective_height_m=50, stability="D")
+        np.testing.assert_allclose(combined, single, rtol=1e-14,
+                                   atol=0, equal_nan=True)
+
+    def test_separated_sources_equal_explicit_field_sum(self):
+        first = self.grid.source
+        second = locate_source(-70.1922, -20.805320,
+                               calculation_crs=first.crs)
+        grid = make_grid_for_sources(
+            [first, second], width_m=1000, height_m=600,
+            resolution_m=20)
+        wind = wind_from_config({"wind_speed_m_s": 4,
+                                 "wind_from_deg": 270})
+        items = [
+            EmissionSource(first, .03, effective_height_m=30, name="A"),
+            EmissionSource(second, .01, effective_height_m=60, name="B"),
+        ]
+        actual = mean_ground_concentration_sources(
+            grid, wind, items, stability="C")
+        expected = sum(
+            mean_ground_concentration(
+                grid, wind, emission_kg_s=item.emission_kg_s,
+                effective_height_m=item.effective_height_m,
+                stability="C", source=item.source,
+                mask_near_source=False)
+            for item in items)
+        minimum = masters_2008_minimum_positive_x_m("C")
+        east, north = np.meshgrid(grid.east_centres_m,
+                                  grid.north_centres_m)
+        invalid = np.zeros(grid.shape, dtype=bool)
+        for item in items:
+            invalid |= np.hypot(east-item.source.easting_m,
+                                north-item.source.northing_m) <= minimum
+        expected[invalid] = np.nan
+        np.testing.assert_allclose(actual, expected, rtol=1e-14,
+                                   atol=0, equal_nan=True)
+
+    def test_multi_source_limit_counts_every_source(self):
+        wind = wind_from_config(self.model)
+        item = EmissionSource(self.grid.source, .02,
+                              effective_height_m=50)
+        cells = int(np.prod(self.grid.shape))
+        with self.assertRaisesRegex(ValueError, "Multi-source"):
+            mean_ground_concentration_sources(
+                self.grid, wind, [item, item], stability="D",
+                max_evaluations=2 * cells - 1)
+
+    def test_multi_source_rejects_ambiguous_height_definition(self):
+        wind = wind_from_config(self.model)
+        stack = BriggsStackParameters(50, 2, 10, 400, 300)
+        invalid = EmissionSource(
+            self.grid.source, .04, effective_height_m=50,
+            briggs_stack=stack)
+        with self.assertRaisesRegex(ValueError, "exactly one"):
+            mean_ground_concentration_sources(
+                self.grid, wind, [invalid], stability="D")
+
+    def test_multi_source_briggs_uses_each_stack_parameters(self):
+        wind = wind_from_config({"wind_speed_m_s": 5,
+                                 "wind_from_deg": 270})
+        first = self.grid.source
+        second = locate_source(-70.1927, -20.805320,
+                               calculation_crs=first.crs)
+        grid = make_grid_for_sources(
+            [first, second], width_m=1000, height_m=600,
+            resolution_m=20)
+        items = [
+            EmissionSource(first, .02, briggs_stack=BriggsStackParameters(
+                40, 1.5, 8, 380, 300), name="A"),
+            EmissionSource(second, .03, briggs_stack=BriggsStackParameters(
+                70, 3, 14, 450, 300), name="B"),
+        ]
+        actual, summaries = mean_ground_concentration_sources(
+            grid, wind, items, stability="D",
+            wind_reference_height_m=10, return_height_summaries=True)
+        expected = sum(
+            mean_ground_concentration(
+                grid, wind, emission_kg_s=item.emission_kg_s,
+                stability="D", briggs_stack=item.briggs_stack,
+                wind_reference_height_m=10, source=item.source,
+                mask_near_source=False)
+            for item in items)
+        minimum = masters_2008_minimum_positive_x_m("D")
+        east, north = np.meshgrid(grid.east_centres_m,
+                                  grid.north_centres_m)
+        invalid = np.zeros(grid.shape, dtype=bool)
+        for item in items:
+            invalid |= np.hypot(east-item.source.easting_m,
+                                north-item.source.northing_m) <= minimum
+        expected[invalid] = np.nan
+        np.testing.assert_allclose(actual, expected, rtol=1e-14,
+                                   atol=0, equal_nan=True)
+        self.assertEqual(len(summaries), 2)
+        self.assertNotEqual(summaries[0].effective_height_mean_m,
+                            summaries[1].effective_height_mean_m)
 
     def test_invalid_wind_configuration(self):
         invalid = [

@@ -12,19 +12,22 @@ import re
 import shutil
 import tempfile
 
-from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtCore import Qt, QMetaType
 from qgis.PyQt.QtWidgets import (QComboBox, QDialog, QDialogButtonBox,
     QDoubleSpinBox, QFileDialog,
     QFormLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit, QMessageBox,
-    QProgressBar, QPushButton, QScrollArea, QSizePolicy, QTableWidget,
-    QTableWidgetItem, QVBoxLayout, QWidget, QStackedWidget)
+    QListWidget, QProgressBar, QPushButton, QScrollArea, QSizePolicy,
+    QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QStackedWidget)
 from qgis.core import (QgsApplication, QgsCoordinateReferenceSystem,
-    QgsCoordinateTransform, QgsPointXY, QgsProcessingAlgRunnerTask,
+    QgsCoordinateTransform, QgsFeature, QgsField, QgsGeometry, QgsPointXY,
+    QgsProcessingAlgRunnerTask,
     QgsProcessingContext, QgsProcessingFeedback, QgsProject, QgsRasterLayer,
     QgsVectorLayer)
 from qgis.gui import QgsDockWidget, QgsMapToolEmitPoint
 
-from .gaussian_spatial import locate_source_coordinates
+from .gaussian_spatial import (locate_source_coordinates,
+                               maximum_geodesic_separation_m)
+from .gaussian_units import canonical_unit, emission_to_kg_s
 from .gaussian_wind_import import normalize_wind_csv, read_wind_csv_preview
 from .styles import style_isolines, style_raster, style_source
 
@@ -225,6 +228,227 @@ class BriggsParametersDialog(QDialog):
         return widget
 
 
+class SourceTableDialog(QDialog):
+    """Edit one source at a time while keeping scenario inputs separate."""
+
+    def __init__(self, rows, emission_unit, height_mode, wind_summary,
+                 parent=None, initial_index=0):
+        super().__init__(parent)
+        self.setWindowTitle(tr('Fuentes emisoras'))
+        self.resize(760, 500)
+        self.emission_unit = emission_unit
+        self.height_mode = height_mode
+        self._source_rows = [dict(row) for row in rows]
+        self._current_index = -1
+        self.edit_wind_requested = False
+        self.rows = None
+        layout = QVBoxLayout(self)
+        note = QLabel(tr('Selecciona una fuente y modifica sus datos.'))
+        note.setWordWrap(True)
+        layout.addWidget(note)
+
+        content = QHBoxLayout()
+        left = QVBoxLayout()
+        left.addWidget(QLabel(tr('Fuentes:')))
+        self.source_list = QListWidget()
+        self.source_list.setMinimumWidth(190)
+        left.addWidget(self.source_list)
+        source_buttons = QHBoxLayout()
+        self.duplicate_button = QPushButton(tr('Duplicar'))
+        self.remove_button = QPushButton(tr('Eliminar'))
+        self.duplicate_button.clicked.connect(self._add_copy)
+        self.remove_button.clicked.connect(self._remove_selected)
+        source_buttons.addWidget(self.duplicate_button)
+        source_buttons.addWidget(self.remove_button)
+        left.addLayout(source_buttons)
+        content.addLayout(left, 1)
+
+        details = QVBoxLayout()
+        basic_form = QFormLayout()
+        self.name_edit = QLineEdit()
+        self.longitude_spin = self._spin(0.0, -180.0, 180.0, 8, "°")
+        self.latitude_spin = self._spin(0.0, -90.0, 90.0, 8, "°")
+        self.emission_spin = self._spin(0.0, 0.0, 1e12, 8,
+                                        " " + emission_unit)
+        self.height_spin = self._spin(50.0, 1e-6, 100000.0, 3, " m")
+        basic_form.addRow(tr('Nombre:'), self.name_edit)
+        basic_form.addRow(tr('Longitud WGS84:'), self.longitude_spin)
+        basic_form.addRow(tr('Latitud WGS84:'), self.latitude_spin)
+        basic_form.addRow(tr('Emisión:'), self.emission_spin)
+        basic_form.addRow((tr('Altura efectiva:') if height_mode == 1 else
+                           tr('Altura de chimenea:')), self.height_spin)
+        details.addWidget(self._group(tr('Fuente seleccionada'), basic_form))
+
+        briggs_form = QFormLayout()
+        self.diameter_spin = self._spin(2.0, 1e-6, 10000.0, 3, " m")
+        self.exit_velocity_spin = self._spin(
+            10.0, 1e-6, 10000.0, 3, " m/s")
+        self.temperature_spin = self._spin(
+            126.85, -273.14, 5000.0, 2, " °C")
+        briggs_form.addRow(tr('Diámetro interior:'), self.diameter_spin)
+        briggs_form.addRow(tr('Velocidad de salida:'),
+                           self.exit_velocity_spin)
+        briggs_form.addRow(tr('Temperatura del gas:'), self.temperature_spin)
+        self.briggs_group = self._group(
+            tr('Elevación de la pluma · fuente seleccionada'), briggs_form)
+        self.briggs_group.setVisible(height_mode == 2)
+        details.addWidget(self.briggs_group)
+
+        weather_layout = QVBoxLayout()
+        self.wind_summary_label = QLabel(tr(
+            'Meteorología compartida; la rapidez se ajusta a la altura de cada '
+            'chimenea.') + '\n' + wind_summary)
+        self.wind_summary_label.setWordWrap(True)
+        weather_layout.addWidget(self.wind_summary_label)
+        self.edit_wind_button = QPushButton(
+            tr('Guardar fuentes y modificar viento…'))
+        self.edit_wind_button.clicked.connect(self._request_wind_edit)
+        weather_layout.addWidget(self.edit_wind_button)
+        weather_group = self._group(tr('Meteorología común'), weather_layout)
+        details.addWidget(weather_group)
+        details.addStretch(1)
+        content.addLayout(details, 2)
+        layout.addLayout(content)
+
+        for row in self._source_rows:
+            self.source_list.addItem(row.get(
+                'name', tr('Fuente {}').format(self.source_list.count() + 1)))
+        self.source_list.currentRowChanged.connect(self._select_source)
+        self.name_edit.textChanged.connect(self._update_current_name)
+        if self._source_rows:
+            self.source_list.setCurrentRow(max(
+                0, min(initial_index, len(self._source_rows) - 1)))
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttons.accepted.connect(self._validate_and_accept)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+    @staticmethod
+    def _unit_factor(unit):
+        return emission_to_kg_s(1.0, canonical_unit(unit))
+
+    @staticmethod
+    def _spin(value, minimum, maximum, decimals=3, suffix=""):
+        widget = QDoubleSpinBox()
+        widget.setDecimals(decimals)
+        widget.setRange(minimum, maximum)
+        widget.setValue(value)
+        widget.setSuffix(suffix)
+        widget.setKeyboardTracking(False)
+        return widget
+
+    @staticmethod
+    def _group(title, contents):
+        group = QGroupBox(title)
+        group.setLayout(contents)
+        return group
+
+    def _save_current(self):
+        if not 0 <= self._current_index < len(self._source_rows):
+            return
+        # keyboardTracking is disabled to keep the panel responsive. Commit
+        # any text still being edited before changing sources or accepting.
+        for widget in (self.longitude_spin, self.latitude_spin,
+                       self.emission_spin, self.height_spin,
+                       self.diameter_spin, self.exit_velocity_spin,
+                       self.temperature_spin):
+            widget.interpretText()
+        factor = self._unit_factor(self.emission_unit)
+        self._source_rows[self._current_index].update({
+            'name': self.name_edit.text().strip() or
+                    tr('Fuente {}').format(self._current_index + 1),
+            'longitude': self.longitude_spin.value(),
+            'latitude': self.latitude_spin.value(),
+            'emission_kg_s': self.emission_spin.value() * factor,
+            'height_m': self.height_spin.value(),
+            'diameter_m': self.diameter_spin.value(),
+            'exit_velocity_m_s': self.exit_velocity_spin.value(),
+            'temperature_c': self.temperature_spin.value(),
+        })
+
+    def _select_source(self, index):
+        self._save_current()
+        self._current_index = index
+        enabled = 0 <= index < len(self._source_rows)
+        for widget in (self.name_edit, self.longitude_spin,
+                       self.latitude_spin, self.emission_spin,
+                       self.height_spin, self.diameter_spin,
+                       self.exit_velocity_spin, self.temperature_spin):
+            widget.setEnabled(enabled)
+        self.remove_button.setEnabled(enabled and len(self._source_rows) > 1)
+        if not enabled:
+            return
+        row = self._source_rows[index]
+        factor = self._unit_factor(self.emission_unit)
+        self.name_edit.setText(row.get(
+            'name', tr('Fuente {}').format(index + 1)))
+        self.longitude_spin.setValue(float(row.get('longitude', 0.0)))
+        self.latitude_spin.setValue(float(row.get('latitude', 0.0)))
+        self.emission_spin.setValue(
+            float(row.get('emission_kg_s', 0.0)) / factor)
+        self.height_spin.setValue(float(row.get('height_m', 50.0)))
+        self.diameter_spin.setValue(float(row.get('diameter_m', 2.0)))
+        self.exit_velocity_spin.setValue(
+            float(row.get('exit_velocity_m_s', 10.0)))
+        self.temperature_spin.setValue(
+            float(row.get('temperature_c', 126.85)))
+
+    def _update_current_name(self, text):
+        if 0 <= self._current_index < self.source_list.count():
+            self.source_list.item(self._current_index).setText(
+                text.strip() or tr('Fuente {}').format(
+                    self._current_index + 1))
+
+    def _add_copy(self):
+        self._save_current()
+        source = (dict(self._source_rows[self._current_index])
+                  if self._source_rows else {})
+        index = len(self._source_rows)
+        source['name'] = tr('Fuente {}').format(index + 1)
+        self._source_rows.append(source)
+        self.source_list.addItem(source['name'])
+        self.source_list.setCurrentRow(index)
+
+    def _remove_selected(self):
+        index = self.source_list.currentRow()
+        if index < 0 or len(self._source_rows) <= 1:
+            return
+        self._current_index = -1
+        self._source_rows.pop(index)
+        self.source_list.takeItem(index)
+        self.source_list.setCurrentRow(min(index, len(self._source_rows) - 1))
+
+    def _request_wind_edit(self):
+        if self._validate_rows():
+            self.edit_wind_requested = True
+            self.accept()
+
+    def _validate_rows(self):
+        self._save_current()
+        if not self._source_rows:
+            QMessageBox.warning(self, tr('Fuentes'),
+                                tr('Ingrese al menos una fuente.'))
+            return False
+        for index, row in enumerate(self._source_rows):
+            row['name'] = row.get('name') or tr('Fuente {}').format(index + 1)
+            values = (row['longitude'], row['latitude'],
+                      row['emission_kg_s'], row['height_m'],
+                      row['diameter_m'], row['exit_velocity_m_s'],
+                      row['temperature_c'])
+            if any(not math.isfinite(float(value)) for value in values):
+                QMessageBox.warning(
+                    self, tr('Fuentes'),
+                    tr('Todas las fuentes deben contener valores válidos.'))
+                return False
+        self.rows = [dict(row) for row in self._source_rows]
+        return True
+
+    def _validate_and_accept(self):
+        if self._validate_rows():
+            self.accept()
+
+
 class GaussianDock(QgsDockWidget):
     """Select a source, inspect coordinates and run the teaching case."""
 
@@ -238,6 +462,9 @@ class GaussianDock(QgsDockWidget):
         self.source_point = None
         self.source_crs = None
         self.wgs84_point = None
+        self.sources = []
+        self._source_layer = None
+        self.pending_multiple_capture = False
         self.active_task = None
         self.task_context = None
         self.task_feedback = None
@@ -252,6 +479,7 @@ class GaussianDock(QgsDockWidget):
         self.setObjectName("GaussianEducationalDock")
         self.setMinimumWidth(420)
         self._build_ui()
+        self._update_source_count()
         self.status_label.setText(
             tr('Elige un punto en el mapa o usa el centro visible del lienzo.'))
 
@@ -320,6 +548,8 @@ class GaussianDock(QgsDockWidget):
         self.emission_spin = self._spin(40.0, 0.0, 1e12, 6)
         self.emission_unit_combo = self._combo(
             ["kg/s", "g/s", "mg/s", "µg/s"], 1)
+        self.emission_unit_combo.currentIndexChanged.connect(
+            self._invalidate_source_layer)
         emission_row.addWidget(self.emission_spin)
         emission_row.addWidget(self.emission_unit_combo)
         self.stack_height_spin = self._spin(50.0, 0.0, 100000.0, 2, " m")
@@ -399,7 +629,8 @@ class GaussianDock(QgsDockWidget):
             'convención DESDE/HACIA y códigos especiales.'))
         csv_help.setWordWrap(True)
         wind_form.addRow("", csv_help)
-        layout.addWidget(self._group(tr('Viento'), wind_form))
+        self.wind_group = self._group(tr('Viento'), wind_form)
+        layout.addWidget(self.wind_group)
 
         grid_form = QFormLayout()
         self.width_spin = self._spin(10000.0, 1.0, 100000.0, 0, " m")
@@ -436,6 +667,28 @@ class GaussianDock(QgsDockWidget):
         output_form.addRow(tr('Isolínea mínima:'), self.contour_minimum_spin)
         layout.addWidget(self._group(tr('Resultados'), output_form))
 
+        multi_layout = QVBoxLayout()
+        multi_note = QLabel(tr(
+            'Opcional: parte de la fuente y parámetros actuales para crear '
+            'una tabla con varias chimeneas.'))
+        multi_note.setWordWrap(True)
+        multi_layout.addWidget(multi_note)
+        multi_buttons = QHBoxLayout()
+        self.manage_sources_button = QPushButton(tr('Agregar multifuente…'))
+        self.add_more_source_button = QPushButton(
+            tr('Añadir otra desde el mapa'))
+        self.clear_sources_button = QPushButton(tr('Volver a fuente única'))
+        self.manage_sources_button.clicked.connect(
+            self.configure_multiple_sources)
+        self.add_more_source_button.clicked.connect(
+            self.add_another_source_from_map)
+        self.clear_sources_button.clicked.connect(self.clear_sources)
+        multi_buttons.addWidget(self.manage_sources_button)
+        multi_buttons.addWidget(self.add_more_source_button)
+        multi_buttons.addWidget(self.clear_sources_button)
+        multi_layout.addLayout(multi_buttons)
+        layout.addWidget(self._group(tr('Varias fuentes'), multi_layout))
+
         base_note = QLabel(
             tr('La ejecución directa usa estos valores. El formulario completo permite ingresar isolíneas manuales y destinos individuales.'))
         base_note.setWordWrap(True)
@@ -467,14 +720,15 @@ class GaussianDock(QgsDockWidget):
         layout.addWidget(self.run_button)
         layout.addWidget(self.cancel_button)
         layout.addStretch(1)
-        scroll = QScrollArea(self)
-        scroll.setWidgetResizable(True)
-        scroll.setFrameShape(QScrollArea.NoFrame)
-        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        scroll.setWidget(body)
-        self.setWidget(scroll)
+        self.scroll = QScrollArea(self)
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setFrameShape(QScrollArea.NoFrame)
+        self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroll.setWidget(body)
+        self.setWidget(self.scroll)
 
     def start_capture(self):
+        self.pending_multiple_capture = False
         self.previous_map_tool = self.canvas.mapTool()
         self.canvas.setMapTool(self.map_tool)
         self.status_label.setText(tr('Haz clic en el mapa para ubicar la fuente.'))
@@ -482,7 +736,11 @@ class GaussianDock(QgsDockWidget):
     def _canvas_clicked(self, point, button):
         del button
         crs = self.canvas.mapSettings().destinationCrs()
-        self.set_source(point, crs)
+        if self.pending_multiple_capture:
+            self.pending_multiple_capture = False
+            self._finish_multiple_source_capture(point, crs)
+        else:
+            self.set_source(point, crs)
         if self.previous_map_tool is not None:
             self.canvas.setMapTool(self.previous_map_tool)
         else:
@@ -528,6 +786,178 @@ class GaussianDock(QgsDockWidget):
             widget.setCursorPosition(0)
         self.status_label.setText(
             tr('Fuente preparada. Revisa las coordenadas antes de simular.'))
+
+    def _invalidate_source_layer(self, *unused):
+        del unused
+        self._source_layer = None
+
+    def _update_source_count(self):
+        self.manage_sources_button.setText(
+            (tr('Modificar multifuente ({})…').format(len(self.sources))
+             if self.sources else tr('Agregar multifuente…')))
+        self.add_more_source_button.setVisible(bool(self.sources))
+        self.clear_sources_button.setEnabled(bool(self.sources))
+
+    def _current_source_row(self, name=None):
+        if self.wgs84_point is None:
+            raise ValueError(
+                tr('Seleccione primero una ubicación en el mapa.'))
+        return {
+            'name': name or tr('Fuente 1'),
+            'longitude': self.wgs84_point.x(),
+            'latitude': self.wgs84_point.y(),
+            'emission_kg_s': emission_to_kg_s(
+                self.emission_spin.value(),
+                self.emission_unit_combo.currentText()),
+            'height_m': self._active_height_spin().value(),
+            'diameter_m': self.stack_diameter_spin.value(),
+            'exit_velocity_m_s': self.exit_velocity_spin.value(),
+            'temperature_c': self.stack_temperature_spin.value(),
+        }
+
+    def add_current_source(self):
+        """Compatibility helper; the visible workflow uses the table dialog."""
+        if self.wgs84_point is None:
+            QMessageBox.warning(self, tr('Fuentes'),
+                                tr('Seleccione primero una ubicación en el mapa.'))
+            return
+        self.sources.append(self._current_source_row(
+            tr('Fuente {}').format(len(self.sources) + 1)))
+        self._invalidate_source_layer()
+        self._update_source_count()
+        self.status_label.setText(tr('Tabla de fuentes actualizada.'))
+
+    def configure_multiple_sources(self):
+        if self.sources:
+            self._open_multiple_source_dialog(self.sources)
+            return
+        try:
+            self._current_source_row()
+        except ValueError as error:
+            QMessageBox.warning(self, tr('Fuentes'), str(error))
+            return
+        self._start_multiple_source_capture(
+            tr('Haz clic en el mapa para ubicar la segunda fuente.'))
+
+    def add_another_source_from_map(self):
+        if not self.sources:
+            self.configure_multiple_sources()
+            return
+        self._start_multiple_source_capture(
+            tr('Haz clic en el mapa para ubicar la nueva fuente.'))
+
+    def _start_multiple_source_capture(self, message):
+        self.pending_multiple_capture = True
+        self.previous_map_tool = self.canvas.mapTool()
+        self.canvas.setMapTool(self.map_tool)
+        self.status_label.setText(message)
+
+    def _finish_multiple_source_capture(self, point, crs):
+        if not crs.isValid():
+            QMessageBox.warning(self, tr('Fuentes'),
+                                tr('El punto necesita un CRS válido'))
+            return
+        point = QgsPointXY(point)
+        wgs84 = QgsCoordinateReferenceSystem("EPSG:4326")
+        if crs != wgs84:
+            point = QgsCoordinateTransform(
+                crs, wgs84, QgsProject.instance()).transform(point)
+        if self.sources:
+            initial_rows = [dict(row) for row in self.sources]
+            new_source = dict(initial_rows[-1])
+        else:
+            first = self._current_source_row(tr('Fuente 1'))
+            initial_rows = [first]
+            new_source = dict(first)
+        new_source.update({
+            'name': tr('Fuente {}').format(len(initial_rows) + 1),
+            'longitude': point.x(),
+            'latitude': point.y(),
+        })
+        initial_rows.append(new_source)
+        self._open_multiple_source_dialog(
+            initial_rows, selected_index=len(initial_rows) - 1)
+
+    def _open_multiple_source_dialog(self, initial_rows, selected_index=0):
+        dialog = SourceTableDialog(
+            initial_rows, self.emission_unit_combo.currentText(),
+            self.height_mode_combo.currentIndex(), self._wind_summary(), self,
+            initial_index=selected_index)
+        if dialog.exec() == QDialog.Accepted:
+            self.sources = dialog.rows
+            self._invalidate_source_layer()
+            self._update_source_count()
+            self.status_label.setText(tr(
+                'Multifuente activa con {} fuentes.').format(
+                    len(self.sources)))
+            if dialog.edit_wind_requested:
+                self.scroll.ensureWidgetVisible(self.wind_group)
+                (self.csv_button if self.wind_mode_combo.currentIndex() == 3
+                 else self.wind_speed_spin).setFocus()
+                self.status_label.setText(tr(
+                    'Fuentes guardadas. Modifica el viento común y vuelve a '
+                    'abrir multifuente si necesitas revisar las chimeneas.'))
+
+    def _wind_summary(self):
+        mode = self.wind_mode_combo.currentText()
+        if self.wind_mode_combo.currentIndex() == 3:
+            source = (Path(self.csv_edit.text()).name
+                      if self.csv_edit.text() else tr('sin CSV'))
+            detail = tr('Archivo: {}').format(source)
+        elif self.wind_mode_combo.currentIndex() == 2:
+            detail = tr('Rapidez de referencia: {:.3f} m/s').format(
+                self.wind_speed_spin.value())
+        else:
+            detail = tr(
+                'Rapidez de referencia: {:.3f} m/s · dirección DESDE: {:.1f}°'
+            ).format(self.wind_speed_spin.value(), self.wind_from_spin.value())
+        return tr('{} · {} · estabilidad {} · medición a {:.2f} m').format(
+            mode, detail, self.stability_combo.currentText(),
+            self.wind_reference_height_spin.value())
+
+    def manage_sources(self):
+        """Backward-compatible alias for tests and saved UI integrations."""
+        self.configure_multiple_sources()
+
+    def clear_sources(self):
+        self.sources = []
+        self._invalidate_source_layer()
+        self._update_source_count()
+        self.status_label.setText(tr(
+            'Multifuente desactivada; se usará la fuente única actual.'))
+
+    def _build_source_layer(self):
+        if self._source_layer is not None:
+            return self._source_layer
+        layer = QgsVectorLayer(
+            "Point?crs=EPSG:4326", tr('Fuentes de la simulación'), "memory")
+        provider = layer.dataProvider()
+        provider.addAttributes([
+            QgsField('name', QMetaType.Type.QString, len=80),
+            QgsField('emission', QMetaType.Type.Double),
+            QgsField('height_m', QMetaType.Type.Double),
+            QgsField('diameter_m', QMetaType.Type.Double),
+            QgsField('exit_m_s', QMetaType.Type.Double),
+            QgsField('temp_c', QMetaType.Type.Double),
+        ])
+        layer.updateFields()
+        factor = emission_to_kg_s(
+            1.0, self.emission_unit_combo.currentText())
+        features = []
+        for row in self.sources:
+            feature = QgsFeature(layer.fields())
+            feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(
+                row['longitude'], row['latitude'])))
+            feature.setAttributes([
+                row['name'], row['emission_kg_s'] / factor, row['height_m'],
+                row['diameter_m'], row['exit_velocity_m_s'],
+                row['temperature_c']])
+            features.append(feature)
+        if not provider.addFeatures(features):
+            raise ValueError(tr('No se pudo preparar la capa de fuentes'))
+        layer.updateExtents()
+        self._source_layer = layer
+        return layer
 
     def choose_csv(self):
         filename, _ = QFileDialog.getOpenFileName(
@@ -616,7 +1046,21 @@ class GaussianDock(QgsDockWidget):
         """Return safe prefilled parameters for the standard Processing dialog."""
         if self.wgs84_point is None:
             raise ValueError(tr('Seleccione primero la ubicación de la fuente'))
+        if self.sources:
+            maximum_distance = maximum_geodesic_separation_m(
+                (row['longitude'], row['latitude']) for row in self.sources)
+            domain_diagonal = math.hypot(
+                self.width_spin.value(), self.domain_height_spin.value())
+            if maximum_distance > domain_diagonal:
+                raise ValueError(tr(
+                    'El modo multifuente usa un único dominio local y una '
+                    'meteorología común. Las fuentes seleccionadas no '
+                    'caben en el dominio de {:.0f} × {:.0f} m. Agrupe '
+                    'fuentes cercanas o ejecute escenarios separados.'
+                ).format(self.width_spin.value(),
+                         self.domain_height_spin.value()))
         parameters = {
+            "SOURCE_MODE": 0,
             "SOURCE": "{:.12g},{:.12g} [EPSG:4326]".format(
                 self.wgs84_point.x(), self.wgs84_point.y()),
             "EMISSION": self.emission_spin.value(),
@@ -646,6 +1090,17 @@ class GaussianDock(QgsDockWidget):
             "CONTOUR_MODE": 0,
             "CONTOUR_MINIMUM": self.contour_minimum_spin.value(),
         }
+        if self.sources:
+            parameters.update({
+                "SOURCE_MODE": 1,
+                "SOURCES": self._build_source_layer(),
+                "SOURCE_NAME_FIELD": "name",
+                "SOURCE_EMISSION_FIELD": "emission",
+                "SOURCE_HEIGHT_FIELD": "height_m",
+                "SOURCE_DIAMETER_FIELD": "diameter_m",
+                "SOURCE_EXIT_VELOCITY_FIELD": "exit_m_s",
+                "SOURCE_TEMPERATURE_FIELD": "temp_c",
+            })
         csv_path = self.csv_edit.text().strip()
         if parameters["WIND_MODE"] == 3:
             if not csv_path:
@@ -694,6 +1149,11 @@ class GaussianDock(QgsDockWidget):
         parameters = dict(parameters or self.algorithm_parameters())
         for key in ("OUTPUT", "ISOLINES", "SOURCE_OUTPUT", "WIND_ROSE"):
             parameters.pop(key, None)
+        for key in ("SOURCES", "SOURCE_NAME_FIELD", "SOURCE_EMISSION_FIELD",
+                    "SOURCE_HEIGHT_FIELD", "SOURCE_DIAMETER_FIELD",
+                    "SOURCE_EXIT_VELOCITY_FIELD",
+                    "SOURCE_TEMPERATURE_FIELD"):
+            parameters.pop(key, None)
         path = Path(filename)
         path.parent.mkdir(parents=True, exist_ok=True)
         wind_hash = None
@@ -705,13 +1165,14 @@ class GaussianDock(QgsDockWidget):
             wind_hash = hashlib.sha256(copied.read_bytes()).hexdigest()
             parameters["WIND_FILE"] = copied.name
         document = {
-            "schema_version": 3,
-            "plugin_version": "0.15.1",
+            "schema_version": 4,
+            "plugin_version": "0.16.5",
             "algorithm": self.ALGORITHM_ID,
             "name": self.scenario_edit.text().strip(),
             "source_input": {
                 "x": self.source_point.x(), "y": self.source_point.y(),
                 "crs": self.source_crs.toWkt()},
+            "sources": self.sources,
             "parameters": parameters,
             "wind_sha256": wind_hash,
             "wind_import": ({"source_file": self.wind_original_path,
@@ -731,11 +1192,12 @@ class GaussianDock(QgsDockWidget):
             raise ValueError(tr('Espere a que termine el cálculo antes de abrir un escenario'))
         path = Path(filename)
         document = json.loads(path.read_text(encoding="utf-8"))
-        if (document.get("schema_version") not in (1, 2, 3) or
+        if (document.get("schema_version") not in (1, 2, 3, 4) or
                 document.get("algorithm") != self.ALGORITHM_ID):
             raise ValueError(tr('Formato de escenario incompatible'))
         self._safe_name(document["name"])
         parameters = dict(document["parameters"])
+        parameters.pop("SOURCE_MODE", None)
         # Extra parameters from earlier schemas are ignored. All scenarios use
         # the Masters 2008 / Martin 1976 formulation.
         parameters.setdefault("WIND_REFERENCE_HEIGHT", 10.0)
@@ -783,6 +1245,30 @@ class GaussianDock(QgsDockWidget):
         crs = QgsCoordinateReferenceSystem()
         crs.createFromWkt(source["crs"])
         self.set_source(QgsPointXY(source["x"], source["y"]), crs)
+        loaded_sources = document.get("sources", [])
+        if not isinstance(loaded_sources, list):
+            raise ValueError(tr('Tabla de fuentes inválida'))
+        required_source_keys = {
+            'name', 'longitude', 'latitude', 'emission_kg_s', 'height_m',
+            'diameter_m', 'exit_velocity_m_s', 'temperature_c'}
+        for row in loaded_sources:
+            if (not isinstance(row, dict) or
+                    not required_source_keys <= set(row)):
+                raise ValueError(tr('Tabla de fuentes inválida'))
+            numeric = [row[key] for key in required_source_keys - {'name'}]
+            if (any(isinstance(value, bool) or
+                    not isinstance(value, (int, float)) or
+                    not math.isfinite(value) for value in numeric) or
+                    not -180 <= row['longitude'] <= 180 or
+                    not -90 <= row['latitude'] <= 90 or
+                    row['emission_kg_s'] < 0 or
+                    min(row['height_m'], row['diameter_m'],
+                        row['exit_velocity_m_s']) <= 0 or
+                    row['temperature_c'] <= -273.15):
+                raise ValueError(tr('Tabla de fuentes inválida'))
+        self.sources = loaded_sources
+        self._invalidate_source_layer()
+        self._update_source_count()
         self.height_mode_combo.setCurrentIndex(parameters["HEIGHT_MODE"])
         for key, widget in widgets.items():
             if isinstance(widget, QComboBox):

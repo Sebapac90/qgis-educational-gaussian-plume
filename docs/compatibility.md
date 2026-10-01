@@ -1,4 +1,18 @@
-# Compatibilidad e idiomas · 0.14.0 · 2026-09-23
+# Compatibilidad e idiomas · candidato 0.16.5 · 2026-10-01
+
+## Política de versiones
+
+Cada serie menor identifica una capacidad principal. La serie `0.16.x`
+corresponde a multifuente; sus ajustes y correcciones avanzan como `0.16.1`,
+`0.16.2`, etc. `0.17.0` se reservará para incorporar otra capacidad. Los ZIP y
+manifiestos ya generados no se sobrescriben: el constructor exige aumentar la
+versión si encuentra el mismo nombre en `dist/`.
+
+Las versiones de trabajo permanecen locales y sin commits. Cuando el usuario y
+el desarrollo acuerden que una versión está lista para publicar, esa versión
+se consolida en un commit, se sube a GitHub y se prepara para el repositorio de
+complementos QGIS. Los ajustes posteriores continúan en un nuevo número de
+parche.
 
 | Sistema / versión | Estado |
 |---|---|
@@ -7,6 +21,30 @@
 | macOS Intel/Rosetta · QGIS 3.44.14 LTR · Qt5 | Batería automática aprobada con el ZIP 0.9.1 |
 | Windows 10 · QGIS 3.44 LTR | Prueba funcional manual del usuario aprobada con el ZIP 0.14.0 |
 | QGIS 4 · Qt6 | Pendiente de adaptación y pruebas; metadata limita la serie a 3.x |
+
+La serie 0.16 añade superposición de fuentes, tabla editable en el panel,
+entrada por capa de puntos en Procesos y persistencia en escenarios JSON. Las
+pruebas automáticas pasaron en QGIS 3.44 LTR para macOS. La fila de Windows
+documenta la versión 0.14.0; el recorrido multifuente de 0.16.5 debe repetirse
+allí antes de publicar la versión como estable.
+
+### Aislamiento de PROJ en QGIS
+
+El 1 de octubre de 2026 macOS registró una caída nativa de QGIS 3.44.14
+(`EXC_BAD_ACCESS`, `SIGBUS`) dentro de `pyproj/PROJ`, ejecutando un algoritmo
+de Procesos en un hilo agrupado. La sesión contenía `PROJ_LIB` de Anaconda,
+mientras QGIS cargaba su propia `libproj`. La reproducción con el Python de esa
+instalación no pudo crear `EPSG:4326` con la ruta externa y funcionó con
+`Contents/Resources/qgis/proj`.
+
+Desde 0.16.4 el complemento localiza `proj.db` dentro de QGIS, configura
+`pyproj` mediante su API soportada y fuerza una lectura de EPSG:4326 durante la
+inicialización. `PROJ_LIB` y `PROJ_DATA` se sustituyen solo durante esa
+inicialización y se restauran inmediatamente; no se escriben preferencias ni
+variables globales del sistema. `scripts/test_qgis_proj_isolation.py` simula
+una ruta externa, comprueba la restauración y crea CRS concurrentemente en ocho
+hilos. Pasó con QGIS 3.40.5/PROJ 8.1.1 y con la instalación exacta que falló,
+QGIS 3.44.14/PROJ 9.8.1.
 
 La versión 0.10.0 añade al panel los modos predominante y aleatorio uniforme
 con los parámetros sintéticos reproducibles del notebook. El ZIP pasó panel,
@@ -117,7 +155,7 @@ humana de usabilidad ni comprueba los selectores nativos de macOS.
 
 ## Aceptación en QGIS 3.44 LTR
 
-1. Usar un perfil limpio e instalar el ZIP 0.14.0, sin paquetes adicionales.
+1. Usar un perfil limpio e instalar el ZIP candidato 0.16.5, sin paquetes adicionales.
 2. Ejecutar la comprobación de dependencias y registrar el instalador exacto.
 3. Repetir Patache con fuente WGS84 y UTM; máximo 221.557028 µg/m³ y borde
    57.279337 µg/m³, tolerancia 0.001. Verificar zoom sobre mapa WGS84 y UTM.
@@ -129,6 +167,8 @@ humana de usabilidad ni comprueba los selectores nativos de macOS.
    a español y comprobar títulos y mensajes.
 7. Reabrir el proyecto: capas, CRS, etiquetas, SVG y simbología conservados.
 8. Repetir con los complementos habituales y registrar incidencias.
+9. Añadir dos fuentes separadas, revisar su tabla, ejecutar, guardar y reabrir
+   el escenario; confirmar dos entidades en la salida y `source_count=2`.
 
 La batería automatizada de estos recorridos pasó en Mac 3.44.14 para arm64 y
 x86_64/Rosetta. Sus informes están en `validation/qgis_344_arm64_091/` y
@@ -137,5 +177,6 @@ x86_64/Rosetta. Sus informes están en `validation/qgis_344_arm64_091/` y
 principal antes de iniciar la tarea: evita el fallo reproducido dentro de PROJ
 en un trabajador Qt sin cambiar el cálculo. El usuario completó además el
 recorrido funcional con el ZIP 0.14.0 en Windows 10 y QGIS 3.44 LTR el
-2026-09-23. El paquete permanece experimental por su alcance docente y porque
-QGIS 4/Qt6 aún no está soportado.
+2026-09-23. El candidato 0.16.5 permanece experimental hasta repetir el
+recorrido multifuente en macOS y Windows. QGIS 4/Qt6 queda fuera del intervalo
+de versiones declarado y requiere una adaptación posterior independiente.

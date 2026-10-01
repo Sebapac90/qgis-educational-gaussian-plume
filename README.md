@@ -1,24 +1,24 @@
 # Pluma Gaussiana Educativa para QGIS
 
-Complemento experimental y bilingüe para enseñar la dispersión atmosférica con una pluma gaussiana estacionaria sobre terreno plano. La implementación física sigue a Masters y Ela (2008), capítulo 7, y utiliza las ecuaciones de dispersión de Martin (1976).
+Complemento bilingüe para enseñar la dispersión atmosférica con una pluma gaussiana estacionaria sobre terreno plano. La implementación física sigue a Masters y Ela (2008), capítulo 7, y utiliza las ecuaciones de dispersión de Martin (1976).
 
 El complemento es una herramienta docente. **No es un modelo regulatorio** y no representa terreno, edificios, deposición, química atmosférica, variación vertical de la dirección del viento ni elevación gradual de la pluma.
 
 ## Descarga e instalación
 
-Descargue el archivo `gaussian_educativo-0.14.0.zip` desde la sección [Releases](https://github.com/Sebapac90/qgis-educational-gaussian-plume/releases). No descomprima el archivo.
+Descargue el ZIP de la versión más reciente desde la sección [Releases](https://github.com/Sebapac90/qgis-educational-gaussian-plume/releases). No descomprima el archivo.
 
 1. Abra QGIS.
 2. Vaya a **Complementos → Administrar e instalar complementos…**.
 3. Seleccione **Instalar a partir de ZIP**.
-4. Elija el archivo descargado y acepte la advertencia de complemento experimental.
+4. Elija el archivo descargado y confirme la instalación.
 5. Abra **Ver → Paneles → Pluma Gaussiana Educativa**.
 
 El complemento no requiere Jupyter ni un entorno Conda. En las versiones de QGIS verificadas utiliza Python, PyQGIS, GDAL, NumPy, PyProj y Matplotlib incluidos con QGIS.
 
 ## Funciones principales
 
-- selección de una fuente desde el lienzo o mediante coordenadas;
+- selección de una o varias fuentes desde el lienzo o mediante una capa de puntos;
 - coordenadas de entrada en WGS 84 o en el CRS del proyecto;
 - conversión automática a UTM/UPS para calcular distancias en metros;
 - emisión en kg/s, g/s, mg/s o µg/s;
@@ -29,6 +29,34 @@ El complemento no requiere Jupyter ni un entorno Conda. En las versiones de QGIS
 - isolíneas automáticas 1–2–5 o niveles definidos por el usuario;
 - interfaz en español e inglés;
 - guardado y recuperación de escenarios JSON.
+
+## Varias fuentes
+
+El recorrido habitual permanece dedicado a una sola chimenea. Para crear un
+caso multifuente, configure primero esa fuente y, al final del panel, pulse
+**Agregar multifuente…**. Marque en el mapa la ubicación de la segunda fuente.
+El complemento abrirá un editor con una lista de fuentes a la izquierda y los
+datos de la fuente seleccionada a la derecha. La segunda fuente hereda emisión,
+altura y parámetros Briggs para que solo sea necesario modificar las
+diferencias, y queda seleccionada al abrirse el editor. Cuando se usa elevación de la pluma, los parámetros Briggs se
+muestran en un bloque propio para cada chimenea. Para una tercera fuente use
+**Añadir otra desde el mapa**. También puede editar las coordenadas manualmente
+o duplicar una fuente. El editor resume la meteorología compartida y permite
+guardar las fuentes y volver directamente al bloque de viento común.
+
+Todas las fuentes comparten el mismo episodio meteorológico, estabilidad,
+exposición y condiciones ambientales. El complemento calcula cada campo por
+separado y aplica la superposición lineal del modelo clásico:
+
+```text
+C_total(E,N) = Σ C_j(E,N)
+```
+
+El dominio mantiene el ancho y alto solicitados y se centra en la extensión de
+las fuentes. Todas deben quedar dentro de un mismo dominio local y comparten el
+mismo episodio meteorológico. Grupos alejados —por ejemplo, en ciudades o
+continentes distintos— requieren escenarios separados. El costo computacional
+cuenta celdas × clases de viento × fuentes.
 
 ## Tabla de viento
 
@@ -48,7 +76,7 @@ Cada fila representa un intervalo de igual duración. La dirección es meteorol�
 Cada ejecución puede producir:
 
 - concentración como GeoTIFF georreferenciado;
-- isolíneas y fuente puntual como capas vectoriales;
+- isolíneas y fuentes puntuales como capas vectoriales;
 - rosa de vientos en PNG;
 - escenario y resumen de resultados en JSON;
 - capas agrupadas, etiquetadas y simbolizadas en el proyecto QGIS.

@@ -6,7 +6,8 @@ from gaussian_core import (gaussian_concentration,
 from gaussian_spatial import (automatic_calculation_crs, ground_concentration,
                               locate_source, locate_source_coordinates,
                               locate_source_from_config, make_grid,
-                              make_grid_bounds,
+                              make_grid_bounds, make_grid_for_sources,
+                              maximum_geodesic_separation_m,
                               plume_coordinates)
 
 
@@ -171,3 +172,42 @@ class SpatialTests(unittest.TestCase):
         self.assertTrue(np.all(np.isfinite(
             concentration[radius > minimum_x])))
         self.assertGreater(np.nanmax(concentration), 0)
+
+    def test_multi_source_grid_uses_extent_centre_and_contains_sources(self):
+        second = locate_source(-70.183195, -20.795320,
+                               calculation_crs=self.source.crs)
+        grid = make_grid_for_sources(
+            [self.source, second], width_m=4000, height_m=4000,
+            resolution_m=100)
+        expected_east = (self.source.easting_m + second.easting_m) / 2
+        expected_north = (self.source.northing_m + second.northing_m) / 2
+        self.assertAlmostEqual(grid.source.easting_m, expected_east, places=6)
+        self.assertAlmostEqual(grid.source.northing_m, expected_north, places=6)
+        west, south, east, north = grid.bounds
+        for source in (self.source, second):
+            self.assertTrue(west <= source.easting_m <= east)
+            self.assertTrue(south <= source.northing_m <= north)
+
+    def test_multi_source_grid_rejects_empty_mixed_crs_and_small_domain(self):
+        with self.assertRaises(ValueError):
+            make_grid_for_sources([], width_m=1000, height_m=1000,
+                                  resolution_m=100)
+        far = locate_source(-69.0, -20.8, calculation_crs=32719)
+        with self.assertRaises(ValueError):
+            make_grid_for_sources([self.source, far], width_m=1000,
+                                  height_m=1000, resolution_m=100)
+        other_crs = locate_source(-75.0, -20.8, calculation_crs=32718)
+        with self.assertRaises(ValueError):
+            make_grid_for_sources([self.source, other_crs], width_m=1000,
+                                  height_m=1000, resolution_m=100)
+
+    def test_geodesic_screen_distinguishes_local_and_distant_sources(self):
+        local = maximum_geodesic_separation_m([
+            (-70.193195, -20.805320), (-70.183195, -20.805320)])
+        distant = maximum_geodesic_separation_m([
+            (-70.193195, -20.805320), (36.8219, -1.2921)])
+        self.assertTrue(1000 < local < 1100)
+        self.assertGreater(distant, 10_000_000)
+        self.assertEqual(maximum_geodesic_separation_m([]), 0.0)
+        with self.assertRaises(ValueError):
+            maximum_geodesic_separation_m([(181.0, 0.0), (0.0, 0.0)])

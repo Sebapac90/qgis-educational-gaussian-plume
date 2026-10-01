@@ -1,11 +1,11 @@
 [general]
 name=Pluma Gaussiana Educativa
-description=Educational Gaussian plume simulations with georeferenced outputs and wind observations.
+description=Educational single- and multiple-source Gaussian plume simulations with georeferenced outputs and wind observations.
 about=Educational, non-regulatory QGIS plugin implementing the classical steady-state Gaussian plume model over flat terrain.
-    Students can select stability A-F, adjust wind speed from its measurement height, use constant, synthetic or CSV wind data, calculate final Briggs plume rise, and create georeferenced raster, isoline, source and wind-rose outputs.
+    Students can combine point sources, select stability A-F, adjust wind speed from its measurement height, use constant, synthetic or CSV wind data, calculate final Briggs plume rise, and create georeferenced raster, isoline, source and wind-rose outputs.
     It does not model terrain effects, gradual plume rise, deposition, building downwash or atmospheric chemistry.
     The interface is available in Spanish and English. It uses NumPy, PyProj and Matplotlib from the QGIS Python environment.
-version=0.15.1
+version=0.16.5
 qgisMinimumVersion=3.40
 qgisMaximumVersion=3.99
 author=Sebastián Pacheco Mercado
@@ -20,6 +20,12 @@ deprecated=False
 server=False
 hasProcessingProvider=True
 tags=gaussian plume,air quality,education,atmospheric dispersion,wind rose
-changelog=0.15.1 - Refines the plume-rise interface: Briggs inputs open in a dedicated dialog; the ambient gradient is enabled only for stability classes E-F; and physical stack-height and entered effective-height inputs are kept separate.
+changelog=0.16.5 - Simplifies the source-editor heading and reports clearly that multiple sources must fit one local domain with shared meteorology, recommending separate scenarios for distant source groups.
+    0.16.4 - Binds pyproj to the PROJ database bundled with QGIS during plugin initialization, preventing foreign Conda or GIS environment paths from reaching background Processing calculations while restoring the process environment immediately.
+    0.16.3 - Opens the source editor on the newly mapped source and commits pending numeric edits before switching sources, so per-stack Briggs diameter, exit velocity and gas temperature are preserved.
+    0.16.2 - Replaces the wide source table with a source list and focused editor; groups per-source Briggs inputs; and provides a direct return to the shared wind controls.
+    0.16.1 - Moves the optional multiple-source workflow to the end of the panel; captures each additional source on the map; preserves current parameters for editing; and supports further mapped or manually duplicated sources.
+    0.16.0 - Adds multiple point sources with per-source emission, height and optional Briggs stack fields; scenario persistence; summed concentration fields; multi-source outputs and computational limits.
+    0.15.1 - Refines the plume-rise interface: Briggs inputs open in a dedicated dialog; the ambient gradient is enabled only for stability classes E-F; and physical stack-height and entered effective-height inputs are kept separate.
     0.15.0 - Adds optional Briggs final plume rise, manual effective height, per-wind-class height calculation and plume-height GeoTIFF metadata.
     0.14.0 - First public experimental release. Masters and Ela formulation, constant and observed wind modes, georeferenced outputs, bilingual interface and reproducible scenarios.

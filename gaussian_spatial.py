@@ -188,6 +188,71 @@ def make_grid(source, *, width_m, height_m, resolution_m):
         resolution_m=resolution_m)
 
 
+def make_grid_for_sources(sources, *, width_m, height_m, resolution_m):
+    """Rectangular grid centred on the bounding-box centre of several sources.
+
+    All sources must already use the same metric calculation CRS.  Width and
+    height retain their single-source meaning: they are the final domain size,
+    not a margin added around the sources.  A source outside that domain is
+    therefore rejected explicitly.
+    """
+    sources = tuple(sources)
+    if not sources:
+        raise ValueError("At least one source is required")
+    if any(not isinstance(source, Source) for source in sources):
+        raise TypeError("sources must contain Source objects")
+    calculation_crs = sources[0].crs
+    if any(not source.crs.equals(calculation_crs) for source in sources[1:]):
+        raise ValueError("All sources must use the same calculation CRS")
+    width = finite_scalar("width_m", width_m)
+    height = finite_scalar("height_m", height_m)
+    eastings = np.asarray([source.easting_m for source in sources])
+    northings = np.asarray([source.northing_m for source in sources])
+    centre_east = float((eastings.min() + eastings.max()) / 2.0)
+    centre_north = float((northings.min() + northings.max()) / 2.0)
+    if (eastings.max() - eastings.min() > width or
+            northings.max() - northings.min() > height):
+        raise ValueError("The selected domain is too small to contain all sources")
+    lon, lat = Transformer.from_crs(
+        calculation_crs, 4326, always_xy=True).transform(
+            centre_east, centre_north, errcheck=True)
+    reference = locate_source(lon, lat, calculation_crs=calculation_crs)
+    grid = make_grid(reference, width_m=width, height_m=height,
+                     resolution_m=resolution_m)
+    west, south, east, north = grid.bounds
+    if (np.any(eastings < west) or np.any(eastings > east) or
+            np.any(northings < south) or np.any(northings > north)):
+        raise ValueError("The selected domain is too small to contain all sources")
+    return grid
+
+
+def maximum_geodesic_separation_m(coordinates):
+    """Maximum great-circle distance between WGS84 longitude/latitude pairs."""
+    coordinates = tuple(coordinates)
+    if len(coordinates) < 2:
+        return 0.0
+    radians = []
+    for longitude, latitude in coordinates:
+        longitude = finite_scalar("longitude", longitude)
+        latitude = finite_scalar("latitude", latitude)
+        if not -180 <= longitude <= 180 or not -90 <= latitude <= 90:
+            raise ValueError("Coordinates must lie within WGS84 bounds")
+        radians.append((math.radians(longitude), math.radians(latitude)))
+    maximum = 0.0
+    radius_m = 6371008.8
+    for index, (lon1, lat1) in enumerate(radians):
+        for lon2, lat2 in radians[index + 1:]:
+            delta_lon = lon2 - lon1
+            delta_lat = lat2 - lat1
+            haversine = (math.sin(delta_lat / 2.0) ** 2 +
+                         math.cos(lat1) * math.cos(lat2) *
+                         math.sin(delta_lon / 2.0) ** 2)
+            distance = 2.0 * radius_m * math.asin(
+                min(1.0, math.sqrt(haversine)))
+            maximum = max(maximum, distance)
+    return maximum
+
+
 def make_grid_bounds(source, *, west_m, south_m, east_m, north_m,
                      resolution_m):
     """Axis-aligned grid from outer pixel edges, preserving centre sampling."""
@@ -211,16 +276,23 @@ def make_grid_bounds(source, *, west_m, south_m, east_m, north_m,
 
 def ground_concentration(grid, *, wind_from_deg, emission_kg_s,
                          wind_speed_m_s, effective_height_m, stability,
-                         mask_near_source=True):
+                         mask_near_source=True, source=None):
     """Return 2-D ground concentration kg/m³; wind FROM true north in degrees.
 
     No default wind direction. The explicit scenario chooses the direction.
     Correct true->grid azimuth once at source; keep a uniform planar wind.
     """
-    grid_angle = finite_scalar("wind_from_deg", wind_from_deg) - grid.source.convergence_deg
+    source = grid.source if source is None else source
+    if not isinstance(source, Source):
+        raise TypeError("source must be a Source object")
+    if not source.crs.equals(grid.source.crs):
+        raise ValueError("Source and grid must use the same calculation CRS")
+    grid_angle = (finite_scalar("wind_from_deg", wind_from_deg) -
+                  source.convergence_deg)
     east, north = np.meshgrid(grid.east_centres_m, grid.north_centres_m)
     down, cross = plume_coordinates(east, north,
-        source_easting_m=grid.source.easting_m, source_northing_m=grid.source.northing_m,
+        source_easting_m=source.easting_m,
+        source_northing_m=source.northing_m,
         wind_from_grid_deg=grid_angle)
     # Apply the published equation unchanged wherever sigma_z is positive.
     # The stability-specific root is mathematical, not a rounded cutoff.
@@ -235,7 +307,7 @@ def ground_concentration(grid, *, wind_from_deg, emission_kg_s,
             effective_height_m=effective_height_m,
             stability=stability)
     if mask_near_source:
-        radius = np.hypot(east - grid.source.easting_m,
-                          north - grid.source.northing_m)
+        radius = np.hypot(east - source.easting_m,
+                          north - source.northing_m)
         concentration[radius <= minimum_x] = np.nan
     return concentration
