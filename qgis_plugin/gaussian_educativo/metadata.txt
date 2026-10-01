@@ -5,7 +5,7 @@ about=Educational, non-regulatory QGIS plugin implementing the classical steady-
     Students can combine point sources, select stability A-F, adjust wind speed from its measurement height, use constant, synthetic or CSV wind data, calculate final Briggs plume rise, and create georeferenced raster, isoline, source and wind-rose outputs.
     It does not model terrain effects, gradual plume rise, deposition, building downwash or atmospheric chemistry.
     The interface is available in Spanish and English. It uses NumPy, PyProj and Matplotlib from the QGIS Python environment.
-version=0.16.5
+version=0.16.6
 qgisMinimumVersion=3.40
 qgisMaximumVersion=3.99
 author=Sebastián Pacheco Mercado
@@ -15,12 +15,13 @@ tracker=https://github.com/Sebapac90/qgis-educational-gaussian-plume/issues
 repository=https://github.com/Sebapac90/qgis-educational-gaussian-plume
 category=Raster
 icon=icons/chimney.png
-experimental=True
+experimental=False
 deprecated=False
 server=False
 hasProcessingProvider=True
 tags=gaussian plume,air quality,education,atmospheric dispersion,wind rose
-changelog=0.16.5 - Simplifies the source-editor heading and reports clearly that multiple sources must fit one local domain with shared meteorology, recommending separate scenarios for distant source groups.
+changelog=0.16.6 - Promotes the validated multiple-source release to stable status without changing the physical model or numerical results.
+    0.16.5 - Simplifies the source-editor heading and reports clearly that multiple sources must fit one local domain with shared meteorology, recommending separate scenarios for distant source groups.
     0.16.4 - Binds pyproj to the PROJ database bundled with QGIS during plugin initialization, preventing foreign Conda or GIS environment paths from reaching background Processing calculations while restoring the process environment immediately.
     0.16.3 - Opens the source editor on the newly mapped source and commits pending numeric edits before switching sources, so per-stack Briggs diameter, exit velocity and gas temperature are preserved.
     0.16.2 - Replaces the wide source table with a source list and focused editor; groups per-source Briggs inputs; and provides a direct return to the shared wind controls.

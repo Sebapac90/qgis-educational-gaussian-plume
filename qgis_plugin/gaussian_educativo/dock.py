@@ -1166,7 +1166,7 @@ class GaussianDock(QgsDockWidget):
             parameters["WIND_FILE"] = copied.name
         document = {
             "schema_version": 4,
-            "plugin_version": "0.16.5",
+            "plugin_version": "0.16.6",
             "algorithm": self.ALGORITHM_ID,
             "name": self.scenario_edit.text().strip(),
             "source_input": {

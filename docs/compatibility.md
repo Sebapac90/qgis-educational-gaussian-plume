@@ -1,4 +1,4 @@
-# Compatibilidad e idiomas · candidato 0.16.5 · 2026-10-01
+# Compatibilidad e idiomas · versión estable 0.16.6 · 2026-10-01
 
 ## Política de versiones
 
@@ -17,16 +17,17 @@ parche.
 | Sistema / versión | Estado |
 |---|---|
 | macOS Intel · QGIS 3.40.5 · Qt5 | Probado con el ZIP: cálculo, CSV, extensión, cancelación e idiomas |
-| macOS Apple Silicon · QGIS 3.44.14 LTR · Qt5 | Batería automática nativa y prueba funcional del usuario aprobadas con el ZIP 0.14.0 |
+| macOS Apple Silicon · QGIS 3.44.14 LTR · Qt5 | Batería automática nativa y prueba funcional del usuario aprobadas; multifuente aceptado para 0.16.6 |
 | macOS Intel/Rosetta · QGIS 3.44.14 LTR · Qt5 | Batería automática aprobada con el ZIP 0.9.1 |
 | Windows 10 · QGIS 3.44 LTR | Prueba funcional manual del usuario aprobada con el ZIP 0.14.0 |
 | QGIS 4 · Qt6 | Pendiente de adaptación y pruebas; metadata limita la serie a 3.x |
 
 La serie 0.16 añade superposición de fuentes, tabla editable en el panel,
 entrada por capa de puntos en Procesos y persistencia en escenarios JSON. Las
-pruebas automáticas pasaron en QGIS 3.44 LTR para macOS. La fila de Windows
-documenta la versión 0.14.0; el recorrido multifuente de 0.16.5 debe repetirse
-allí antes de publicar la versión como estable.
+pruebas automáticas pasaron en QGIS 3.44 LTR para macOS y el usuario aceptó el
+recorrido funcional multifuente. La versión 0.16.6 se publica como estable. La
+fila de Windows documenta la versión 0.14.0; repetir allí el recorrido
+multifuente queda como comprobación adicional de compatibilidad.
 
 ### Aislamiento de PROJ en QGIS
 
@@ -155,7 +156,7 @@ humana de usabilidad ni comprueba los selectores nativos de macOS.
 
 ## Aceptación en QGIS 3.44 LTR
 
-1. Usar un perfil limpio e instalar el ZIP candidato 0.16.5, sin paquetes adicionales.
+1. Usar un perfil limpio e instalar el ZIP estable 0.16.6, sin paquetes adicionales.
 2. Ejecutar la comprobación de dependencias y registrar el instalador exacto.
 3. Repetir Patache con fuente WGS84 y UTM; máximo 221.557028 µg/m³ y borde
    57.279337 µg/m³, tolerancia 0.001. Verificar zoom sobre mapa WGS84 y UTM.
@@ -177,6 +178,7 @@ x86_64/Rosetta. Sus informes están en `validation/qgis_344_arm64_091/` y
 principal antes de iniciar la tarea: evita el fallo reproducido dentro de PROJ
 en un trabajador Qt sin cambiar el cálculo. El usuario completó además el
 recorrido funcional con el ZIP 0.14.0 en Windows 10 y QGIS 3.44 LTR el
-2026-09-23. El candidato 0.16.5 permanece experimental hasta repetir el
-recorrido multifuente en macOS y Windows. QGIS 4/Qt6 queda fuera del intervalo
-de versiones declarado y requiere una adaptación posterior independiente.
+2026-09-23. El usuario aceptó el recorrido multifuente en macOS el 2026-10-01
+y autorizó publicar 0.16.6 como estable. Repetir ese recorrido en Windows queda
+como comprobación adicional de compatibilidad. QGIS 4/Qt6 queda fuera del
+intervalo de versiones declarado y requiere una adaptación posterior independiente.
